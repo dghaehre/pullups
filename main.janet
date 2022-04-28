@@ -17,19 +17,37 @@
      [:body
        body]]))
 
+(def home/header
+  [:header
+    [:h2 "A pushups competition" ]
+    [:h4 "See if you can beat your friends"]])
+
+(def home/footer
+  [:footer
+   [:p {:style "text-align: center" }
+    [:span "Made with love by " ]
+    [:a {:href "https://dghaehre.com"} "Daniel"]]])
+
+(def home/main
+  [:main {:style "text-align: center" }
+     [:h3 "Create a competition"]
+     [:form
+      [:p
+        [:input {:text "some input"
+                 :name "name"
+                 :placeholder "Some wierd name"}]]
+      [:p
+        [:button {:type "submit"} [ "Create" ]]]]])
 
 # Routes
 (route :get "/" :home)
 
 (defn home [request]
-  [:div {:class "tc"}
-   [:h1 "You found joy!"]
-   [:p {:class "code"}
-    [:b "Joy Version:"]
-    [:span (string " " version)]]
-   [:p {:class "code"}
-    [:b "Janet Version:"]
-    [:span janet/version]]])
+  " Home screen
+    Let user create a new 'contest'"
+  [ home/header
+   home/main
+   home/footer ])
 
 
 # Middleware

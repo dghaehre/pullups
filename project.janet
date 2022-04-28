@@ -8,6 +8,9 @@
   :url ""
   :repo "")
 
+(phony "dev" []
+  (os/shell "find . -name '*.janet' | entr janet main.janet"))
+
 (phony "server" []
   (if (= "development" (os/getenv "JOY_ENV"))
       # TODO check if entr exists
