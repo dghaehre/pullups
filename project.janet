@@ -1,5 +1,5 @@
 (declare-project
-  :name "pushups"
+  :name "pullups"
   :description ""
   :dependencies ["https://github.com/joy-framework/joy"
                  "https://github.com/janet-lang/sqlite3"]
@@ -9,7 +9,7 @@
   :repo "")
 
 (phony "dev" []
-  (os/shell "find . -name '*.janet' | entr janet main.janet"))
+  (os/shell "find . -name '*.janet' | entr -r -s \"janet main.janet\""))
 
 (phony "server" []
   (if (= "development" (os/getenv "JOY_ENV"))

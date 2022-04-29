@@ -7,7 +7,7 @@
     (doctype :html5)
     [:html {:lang "en"}
      [:head
-      [:title "Pushups"]
+      [:title "Pullups"]
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
       [:meta {:name "csrf-token" :content (csrf-token-value request)}]
@@ -19,7 +19,7 @@
 
 (def home/header
   [:header
-    [:h2 "A pushups competition" ]
+    [:h2 "A pullups competition" ]
     [:h4 "See if you can beat your friends"]])
 
 (def home/footer
@@ -28,23 +28,43 @@
     [:span "Made with love by " ]
     [:a {:href "https://dghaehre.com"} "Daniel"]]])
 
+(defn home/submit
+  "Create competition button"
+  [disabled]
+  (def attr @{:type "submit" })
+  (if disabled
+    (put attr :disabled "true"))
+  [:button (table/to-struct attr)
+    [ "Create competition" ]])
+
 (def home/main
-  [:main {:style "text-align: center" }
+  [:main {:style "text-align: center"}
      [:h3 "Create a competition"]
      [:form
       [:p
-        [:input {:text "some input"
+        [:input {:type "text"
                  :name "name"
+                 :hx-get "/check-name"
+                 :hx-trigger "keyup changed delay:500ms"
+                 :hx-target "#submit"
                  :placeholder "Some wierd name"}]]
-      [:p
-        [:button {:type "submit"} [ "Create" ]]]]])
+      [:p {:id "submit" } (home/submit true)]]])
 
 # Routes
 (route :get "/" :home)
 
-(defn home [request]
-  " Home screen
-    Let user create a new 'contest'"
+(route :get "/check-name" :checkname)
+
+(defn checkname
+  "Check if name is available"
+  [request]
+  (text/html (home/submit false)))
+
+
+(defn home
+  "Home screen
+  Let user create a new 'contest'"
+  [request]
   [ home/header
    home/main
    home/footer ])
@@ -68,7 +88,9 @@
 
 # Server
 (defn main [& args]
-  (let [port (get args 1 (os/getenv "PORT" "9001"))
+  (let [port (get args 1 (env :PORT))
         host (get args 2 "localhost")]
     (print (string "serving at " host ":" port))
-    (server app port host)))
+    (db/connect (env :database-url))
+    (server app port host)
+    (db/disconnect)))

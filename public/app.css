@@ -1,2 +1,7 @@
 /* Set custom colors */
+:root {
+  --bg: #39424E;
+  --text: white;
+  --accent-bg: #22272e;
+}
 
