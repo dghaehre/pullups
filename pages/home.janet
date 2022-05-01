@@ -30,7 +30,7 @@
         [:input {:type "text"
                  :name "name"
                  :hx-get "/check-name"
-                 :hx-trigger "keyup changed delay:500ms"
+                 :hx-trigger "keyup changed delay:200ms, load"
                  :hx-target "#submit"
                  :placeholder "Some wierd name"}]]
       [:p {:id "submit" } (submit true)]]])
