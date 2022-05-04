@@ -24,10 +24,13 @@
               :user_id user-id
               :contest_id contest-id}))
 
+# TODO: make it one transaction
 (defn create-user
   "Create a user within a contest.
   We also create a recording for the user to link the user to the given contest."
   [name contest-id]
+  (pp name)
+  (pp contest-id)
   (def user (db/insert {:db/table :user
               :name name}))
   (insert-recording 0 (get user :id) contest-id))

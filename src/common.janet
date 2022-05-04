@@ -1,9 +1,5 @@
 (use joy)
 
-(defn common/name-to-path
-  [name]
-  name)
-
 (defn valid-contest-name?
   "Is given name valid?"
   [name]
@@ -26,3 +22,23 @@
   [name]
   [:header
     [:h3 {:style "margin: 20px 0px -5px"} name ]])
+
+(def footer
+  [:footer
+   [:p {:style "text-align: center" }
+    [:span "Made with love by " ]
+    [:a {:href "https://dghaehre.com"} "Daniel"]]])
+
+# TODO
+(defn populate-users
+  "Merge recordings into users array"
+  [users recordings]
+  (defn f [user]
+    (defn ff [user rec]
+      (if (= (get user :id) (get rec :user-id))
+        user # Populate user struct with rec data
+        user))
+    (reduce ff user recordings))
+  (map f users))
+
+

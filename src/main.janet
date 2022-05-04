@@ -1,5 +1,4 @@
 (use joy)
-(use ./routes/contest)
 (use ./pages/home)
 (use ./pages/contest)
 

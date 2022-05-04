@@ -7,12 +7,6 @@
     [:h2 "A pullups competition" ]
     [:h4 "See if you can beat your friends"]])
 
-(def- footer
-  [:footer
-   [:p {:style "text-align: center" }
-    [:span "Made with love by " ]
-    [:a {:href "https://dghaehre.com"} "Daniel"]]])
-
 (defn- submit
   "Create competition button"
   [disabled]
@@ -63,4 +57,4 @@
   [request]
   [ header
    main
-   footer ])
+   common/footer ])
