@@ -21,7 +21,8 @@
 (defn header
   [name]
   [:header
-    [:h3 {:style "margin: 20px 0px -5px"} name ]])
+    [:h3 {:style "margin: 20px 0px -5px"}
+     [:a {:href (string "/" name)} name ]]])
 
 (def footer
   [:footer

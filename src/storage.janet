@@ -45,6 +45,13 @@
   (db/from :user
            :where {:id ids}))
 
+(defn get-user
+  [id]
+  (def users (get-users id))
+  (if (empty? users)
+    nil
+    (get users 0)))
+
 # (get-users @[1 2])
 # (get-recordings 1)
 # (create-user "daniel" 1)

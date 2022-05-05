@@ -11,10 +11,11 @@
   [:ul (map list users) ])
 
 (defn- overview
-  [users]
-  (defn list [{:name name :alltime alltime :today today }]
+  [contest-name users]
+  (defn list [{:id id :name name :alltime alltime :today today }]
     [:tr
-     [:td name ]
+     [:td
+      [:a {:href (string "/" contest-name "/" id) } name ] ]
      [:td today ]
      [:td alltime ]])
   [:table {:style "display: inline-table; margin: 0;" }
@@ -26,11 +27,17 @@
    [:tbody
     (map list users )]])
 
-# (defn- new-user-form
-#   [collapsed]
-#   (if collapsed
-#     [:button {:style "float: right" }
-#      "Add new user" ]))
+(defn- record-form
+  [contest user-id current-amount]
+   [:form {:method "post" :action "/record" }
+    [:p
+      [:input {:type "text" :placeholder current-amount :name "amount"} ]]
+    [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
+    [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
+    [:input {:type "hidden" :name "user-id" :value user-id } ]
+    [:p 
+      [:button {:type "submit"} "Record" ]]])
+
 
 (defn- new-user-form
   [contest]
@@ -51,22 +58,46 @@
   (def data (common/populate-users users recordings))
   (pp data)
   [:main
-   (overview users)
+   (overview (get contest :name) users)
    (new-user-form contest)])
+
+(defn- main/user
+  [user contest]
+  [:main
+   [:h3 (get user :name) ]
+   (record-form contest (get user :id) 0) ])
+
 
 # Routes
 
 (route :get "/:contest" :contest/index)
+(route :get "/:contest/:user-id" :contest/user)
 (route :post "/create-user" :contest/create-user)
+(route :post "/record" :contest/record)
 
 (defn contest/index
   [req]
+  (pp req)
   (def name (get-in req [:params :contest]))
   (def contest (st/get-contest name))
   (if (nil? contest)
     (redirect-to :home/index)
     [ (common/header (get contest :name))
       (main/content contest)
+      common/footer ]))
+
+(defn contest/user
+  [req]
+  (def contest-name (get-in req [:params :contest]))
+  (def user-id (get-in req [:params :user-id]))
+  (def contest (st/get-contest contest-name))
+  (if (nil? contest)
+    (redirect-to :home/index))
+  (def user (st/get-user user-id))
+  (if (nil? user)
+    (redirect-to :home/contest {:contest contest-name})
+    [ (common/header (get contest :name))
+      (main/user user contest)
       common/footer ]))
 
 (defn contest/create-user
@@ -76,5 +107,14 @@
   (def contest-id (get-in req [:body :contest-id]))
   (def contest-name (get-in req [:body :contest-name]))
   (st/create-user name contest-id)
+  (redirect-to :contest/index {:contest contest-name }))
+
+(defn contest/record
+  [req]
+  (def user-id (get-in req [:body :user-id]))
+  (def contest-id (get-in req [:body :contest-id]))
+  (def contest-name (get-in req [:body :contest-name]))
+  (def amount (get-in req [:body :amount]))
+  (st/insert-recording amount user-id contest-id)
   (redirect-to :contest/index {:contest contest-name }))
 
