@@ -34,11 +34,14 @@
   "Merge recordings into users array"
   [users recordings]
   (defn f [user]
-    (defn ff [user rec]
-      (if (= (get user :id) (get rec :user-id))
-        user # Populate user struct with rec data
-        user))
-    (reduce ff user recordings))
+    (loop [r :in recordings :when (= (get user :id) (get r :user-id))]
+      (do
+        (def current-today (get user :today 0))
+        (def current-alltime (get user :alltime 0))
+        (put user :alltime (+ current-alltime (get r :amount)))
+        (put user :today 0)
+        ))
+    user)
   (map f users))
 
 

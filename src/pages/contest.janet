@@ -12,11 +12,11 @@
 
 (defn- overview
   [users]
-  (defn list [{:name name }]
+  (defn list [{:name name :alltime alltime :today today }]
     [:tr
      [:td name ]
-     [:td 10 ]
-     [:td 100 ]])
+     [:td today ]
+     [:td alltime ]])
   [:table {:style "display: inline-table; margin: 0;" }
    [:thead
     [:tr
