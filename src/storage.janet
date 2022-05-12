@@ -35,6 +35,11 @@
               :name name}))
   (insert-recording 0 (get user :id) contest-id))
 
+# (defn get-today
+#   [contest-id user-id]
+#   (db/from :recording
+#            :where {:contest-id contest-id }))
+
 (defn get-recordings
   [contest-id]
   (db/from :recording
@@ -66,6 +71,14 @@
            :join/one :user))
 
 # (get-all)
+
+(defn- delete-recording
+  "Just a helper function used in development"
+  [id]
+  (db/delete :recording id))
+
+# (get-recordings 1)
+# (delete-recording 2)
 
 (defn- delete-contest
   "Just a helper function used in development"

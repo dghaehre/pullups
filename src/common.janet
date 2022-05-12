@@ -39,7 +39,7 @@
       (do
         (def current-today (get user :today 0))
         (def current-alltime (get user :alltime 0))
-        (put user :alltime (+ current-alltime (get r :amount)))
+        (put user :alltime (+ current-alltime (get r :amount 0)))
         (put user :today 0)
         ))
     user)
