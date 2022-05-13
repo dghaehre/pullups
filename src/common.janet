@@ -45,4 +45,7 @@
     user)
   (map f users))
 
-
+(defmacro with-err
+  "Map possible error"
+  [err & body]
+  ~(try ,;body ([_] (error ,err))))

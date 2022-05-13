@@ -30,9 +30,6 @@
 (defn- record-form
   [contest user-id current-amount]
   (def t (os/date (os/time) :local))
-  # Fuck this shit.
-  # Lets create a 'select' with only two days as option.
-  # Example: Monday, Sunday
   (def tmin (string (get t :year) "-0" (+ 1 (get t :month)) "-0" (get t :month-day)))
   (def tmax (string (get t :year) "-0" (+ 1 (get t :month)) "-0" (+ (get t :month-day) 1)))
    [:form {:method "post" :action "/record" }
@@ -71,11 +68,12 @@
    (new-user-form contest)])
 
 (defn- main/user
-  [user contest]
+  [user contest err]
   [:main
    [:h3 (get user :name) ]
-   (record-form contest (get user :id) 0) ])
-
+   (record-form contest (get user :id) 0)
+   (if-not (nil? err)
+     [:p {:style "color: pink"} err])])
 
 # Routes
 
@@ -86,7 +84,6 @@
 
 (defn contest/index
   [req]
-  (pp req)
   (def name (get-in req [:params :contest]))
   (def contest (st/get-contest name))
   (if (nil? contest)
@@ -97,6 +94,7 @@
 
 (defn contest/user
   [req]
+  (def query-error (get-in req [:query-string :error]))
   (def contest-name (get-in req [:params :contest]))
   (def user-id (get-in req [:params :user-id]))
   (def contest (st/get-contest contest-name))
@@ -106,7 +104,7 @@
   (if (nil? user)
     (redirect-to :home/contest {:contest contest-name})
     [ (common/header (get contest :name))
-      (main/user user contest)
+      (main/user user contest query-error)
       common/footer ]))
 
 (defn contest/create-user
@@ -120,16 +118,15 @@
 
 (defn contest/record
   [req]
-  (def user-id (get-in req [:body :user-id]))
-  (def contest-id (get-in req [:body :contest-id]))
-  (def contest-name (get-in req [:body :contest-name]))
+  (let [user-id (get-in req [:body :user-id])
+        contest-id (get-in req [:body :contest-id])
+        contest-name (get-in req [:body :contest-name])]
+    (try
+      (let [amount (common/with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
+        (st/insert-recording amount user-id contest-id)
+        (redirect-to :contest/index {:contest contest-name }))
 
-  (try
-    (do
-      (def amount (int/to-number (int/u64 (get-in req [:body :amount]))))
-      (st/insert-recording amount user-id contest-id)
-      (redirect-to :contest/index {:contest contest-name }))
-
-    ([err fib]
-     # TODO: add error message to page
-      (redirect-to :contest/user {:contest contest-name :user-id user-id}))))
+      ([err fib]
+        (redirect-to :contest/user { :contest contest-name
+                                    :user-id user-id
+                                    :? {:error err }})))))
