@@ -123,13 +123,13 @@
   (def user-id (get-in req [:body :user-id]))
   (def contest-id (get-in req [:body :contest-id]))
   (def contest-name (get-in req [:body :contest-name]))
-  (def amount (try
-               (int/to-number (int/u64 (get-in req [:body :amount])))
-               ([err fib] "not number")))
-  (if (not (number? amount))
-    # TODO: add error message
-    (redirect-to :contest/user {:contest contest-name :user-id user-id})
+
+  (try
     (do
-      # Add some error text
+      (def amount (int/to-number (int/u64 (get-in req [:body :amount]))))
       (st/insert-recording amount user-id contest-id)
-      (redirect-to :contest/index {:contest contest-name }))))
+      (redirect-to :contest/index {:contest contest-name }))
+
+    ([err fib]
+     # TODO: add error message to page
+      (redirect-to :contest/user {:contest contest-name :user-id user-id}))))
