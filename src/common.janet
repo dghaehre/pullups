@@ -3,10 +3,10 @@
 (defn valid-contest-name?
   "Is given name valid?"
   [name]
-  (let [names @["admin" "blog" "about" "terms" "login"]]
+  (let [not-valid-names @["admin" "blog" "about" "terms" "login"]]
     (and
       (< 2 (length name))
-      (empty? (filter |(= name $0) names)))))
+      (empty? (filter |(= name $0) not-valid-names)))))
 
 (defn unique-user-ids
   "Take in a list of recordings, and return a list of unique user ids."
@@ -40,10 +40,16 @@
         (def current-today (get user :today 0))
         (def current-alltime (get user :alltime 0))
         (put user :alltime (+ current-alltime (get r :amount 0)))
-        (put user :today 0)
+        (put user :today 0) # TODO
         ))
     user)
   (map f users))
+
+# TODO
+(defn is-today? [t]
+  (def today (os/date (os/time) :local))
+  (def time (os/date t :local))
+  false)
 
 (defmacro with-err
   "Map possible error"

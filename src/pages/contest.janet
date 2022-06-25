@@ -28,15 +28,14 @@
     (map list users )]])
 
 (defn- record-form
+  "Where you record your daily stuff..."
   [contest user-id current-amount]
   (def t (os/date (os/time) :local))
   (def tmin (string (get t :year) "-0" (+ 1 (get t :month)) "-0" (get t :month-day)))
   (def tmax (string (get t :year) "-0" (+ 1 (get t :month)) "-0" (+ (get t :month-day) 1)))
    [:form {:method "post" :action "/record" }
-    [:select {:name "day"}
-      [:option {:value "monday"} "Monday" ]
-      [:option {:value "sunday"} "Sunday" ]]
     [:p
+      [:label [:p "Today"]]
       [:input {:type "text" :placeholder current-amount :name "amount"} ]]
     [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
     [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
@@ -71,6 +70,7 @@
   [user contest err]
   [:main
    [:h3 (get user :name) ]
+   [:hr]
    (record-form contest (get user :id) 0)
    (if-not (nil? err)
      [:p {:style "color: pink"} err])])
