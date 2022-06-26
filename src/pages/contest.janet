@@ -71,7 +71,7 @@
   [:main
    [:h3 (get user :name) ]
    [:hr]
-   (record-form contest (get user :id) 0)
+   (record-form contest (get user :id) (get user :today))
    (if-not (nil? err)
      [:p {:style "color: pink"} err])])
 
@@ -102,10 +102,11 @@
     (redirect-to :home/index))
   (def user (st/get-user user-id))
   (if (nil? user)
-    (redirect-to :home/contest {:contest contest-name})
-    [ (common/header (get contest :name))
-      (main/user user contest query-error)
-      common/footer ]))
+    (redirect-to :home/contest {:contest contest-name}))
+  (put user :today (st/get-today-amount (get contest :id) user-id))
+  [ (common/header (get contest :name))
+    (main/user user contest query-error)
+    common/footer ])
 
 (defn contest/create-user
   [req]

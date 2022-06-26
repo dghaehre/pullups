@@ -30,26 +30,21 @@
     [:span "Made with love by " ]
     [:a {:href "https://dghaehre.com"} "Daniel"]]])
 
-# TODO
 (defn populate-users
   "Merge recordings into users array"
   [users recordings]
+  (def {:year-day yd :year y } (os/date (os/time) :local))
   (defn f [user]
+    (put user :today 0)
     (loop [r :in recordings :when (= (get user :id) (get r :user-id))]
       (do
-        (def current-today (get user :today 0))
         (def current-alltime (get user :alltime 0))
         (put user :alltime (+ current-alltime (get r :amount 0)))
-        (put user :today 0) # TODO
+        (if (and (= yd (get r :year-day)) (= y (get r :year)))
+          (put user :today (get r :amount 0)))
         ))
     user)
   (map f users))
-
-# TODO
-(defn is-today? [t]
-  (def today (os/date (os/time) :local))
-  (def time (os/date t :local))
-  false)
 
 (defmacro with-err
   "Map possible error"
