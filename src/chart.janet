@@ -1,22 +1,13 @@
 (use joy)
 (import json)
 
-(defn- create-chart [data]
-  (pp data)
-  [:script (raw (string "
-const test = " (json/encode data) ";
-const labels = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-];
+# TODO: fix labels
 
+(defn- create-chart [data labels]
+  [:script (raw (string "
 const data = {
-  labels: labels,
-  datasets: test,
+  labels: " (json/encode labels) ",
+  datasets: " (json/encode data) ",
 };
 
 const config = {
@@ -30,6 +21,9 @@ const myChart = new Chart(
   config
 );"))])
 
+#
+# TODO: this is not finished. It needs to take into considerations the other users data.
+# At some points/labels it might be needed to use 0
 (defn create-dataset [users recordings]
   ```Create data for chart.js
 
@@ -41,25 +35,28 @@ const myChart = new Chart(
     data: [0, 10, 5, 2, 20, 30, 45],
   }]
   ```
-  # (var labels [])
   (defn f [user]
-    (var data (array/new 10)) # TODO: get capacity somehow
+    (var data @[]) # TODO: get capacity somehow
     (loop [r :in recordings :when (= (get user :id) (get r :user-id))]
       (do
         (def current-alltime (get user :alltime 0))
         (put user :alltime (+ current-alltime (get r :amount 0)))
-        (array/push data (get r :amount 0))
-        ))
+        (array/concat data (get r :amount 0))))
     @{:label (get user :name)
       :backgroundColor "rgb(255, 99, 132)"
       :borderColor "rgb(255, 99, 132)"
       :data data })
   (map f users))
 
+(defn create-labels [recordings]
+  @["Monday" "Tuesday" "Wednesday"])
+
 (defn overview [users recordings]
+  (def data (create-dataset users recordings))
+  (def labels (create-labels recordings))
   [:div
    # TODO: use local chart.js
     [:script {:src "https://cdn.jsdelivr.net/npm/chart.js"}]
     [:canvas {:id "chart-overview"}]
-    (create-chart (create-dataset users recordings))])
+    (create-chart data labels)])
 
