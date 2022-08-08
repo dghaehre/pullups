@@ -2,6 +2,7 @@
   :name "pullups"
   :description ""
   :dependencies ["https://github.com/joy-framework/joy"
+                 "https://github.com/janet-lang/json"
                  "https://github.com/janet-lang/sqlite3"]
   :author ""
   :license ""

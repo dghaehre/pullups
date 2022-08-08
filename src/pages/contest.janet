@@ -1,6 +1,7 @@
 (use joy)
 (import ../common :as common)
 (import ../storage :as st)
+(import ../chart :as chart)
 
 # Views
 
@@ -64,7 +65,8 @@
   (pp data)
   [:main
    (overview (get contest :name) users)
-   (new-user-form contest)])
+   (new-user-form contest)
+   (chart/overview users recordings)])
 
 (defn- main/user
   [user contest err]

@@ -56,13 +56,14 @@
   "Get todays amount for given user"
   (try
     (let [{:year-day year-day :year year } (os/date (os/time) :local)]
-      (-> (db/from :recording
+      (or (-?> (db/from :recording
                :where {:contest-id contest-id
                        :user-id user-id
                        :year year
                        :year-day year-day})
-            (get 0)
-            (get :amount)))
+                (get 0)
+                (get :amount))
+            0))
   ([err _] (do (pp err) 0))))
 
 (defn get-user [id]
