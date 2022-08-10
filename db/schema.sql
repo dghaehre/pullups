@@ -20,7 +20,7 @@ CREATE TABLE recording (
   updated_at integer,
   year_day integer not null,
   year integer not null,
-  UNIQUE (user_id, year, year_day),
   foreign key(user_id) references user(id),
-  foreign key(contest_id) references contest(id)
+  foreign key(contest_id) references contest(id),
+  UNIQUE (user_id, year, year_day)
 )

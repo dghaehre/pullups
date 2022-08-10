@@ -9,8 +9,8 @@ create table recording (
   year_day integer not null,
   year integer not null,
   foreign key(user_id) references user(id),
-  foreign key(contest_id) references contest(id)
-  UNIQUE (user_id, year, year_day),
+  foreign key(contest_id) references contest(id),
+  UNIQUE (user_id, year, year_day)
 )
 
 -- down
