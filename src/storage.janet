@@ -66,6 +66,10 @@
             0))
   ([err _] (do (pp err) 0))))
 
+(defn get-chart-data [contest-id]
+  (db/query
+"select user.id, user.name, recording.amount, recording.year, recording.year_day, (recording.year_day + recording.year) as i from recording left join user on user.id = recording.user_id where recording.contest_id = :id" {:id contest-id}))
+
 (defn get-user [id]
   (def users (get-users id))
   (if (empty? users)
