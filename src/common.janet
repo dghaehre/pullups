@@ -28,25 +28,45 @@
   [:footer
    [:p {:style "text-align: center" }
     [:span "Made with love by " ]
-    [:a {:href "https://dghaehre.com"} "Daniel"]]])
-
-(defn populate-users
-  "Merge recordings into users array"
-  [users recordings]
-  (def {:year-day yd :year y } (os/date (os/time) :local))
-  (defn f [user]
-    (put user :today 0)
-    (loop [r :in recordings :when (= (get user :id) (get r :user-id))]
-      (do
-        (def current-alltime (get user :alltime 0))
-        (put user :alltime (+ current-alltime (get r :amount 0)))
-        (if (and (= yd (get r :year-day)) (= y (get r :year)))
-          (put user :today (get r :amount 0)))
-        ))
-    user)
-  (map f users))
+    [:a {:href "https://dghaehre.com"} "Daniel"]
+    [:span " and " ]
+    [:a {:href "https://janet-lang.org"} "Janet"]]])
 
 (defmacro with-err
   "Map possible error"
   [err & body]
   ~(try ,;body ([_] (error ,err))))
+
+
+(defn padd-users [users rec]
+  ```
+  Takes a list of users and one recording.
+  Returns a new list of users where the recording either
+  has been padded to the existing user or had been added to
+  a new user in the list.
+  ```
+  (var exist false)
+  (loop [u :in users :when (= (get u :id) (get rec :id))]
+    (do
+      (put u :recs (array/concat (get u :recs) @{:amount (get rec :amount)
+                                              :year (get rec :year)
+                                              :year-day (get rec :year-day)}))
+      (set exist true)))
+  (if-not exist
+    (array/concat users @{:id (get rec :id)
+                          :name (get rec :name)
+                          :recs @[@{:amount (get rec :amount)
+                                    :year (get rec :year)
+                                    :year-day (get rec :year-day)}]}))
+  users)
+
+(defn tail [arr &opt none]
+  `Take last element of list`
+  (get arr (- (length arr) 1) none))
+
+(defn map-indexed [f ds]
+  ```
+  A map that also provide an index
+  (map-indexed (fn [i v] [i v] ) ["a" "b" "c" "d"])
+  ```
+  (map f (range 0 (length ds)) ds))

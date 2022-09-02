@@ -3,13 +3,54 @@
 (import ./common :as common)
 (import ./storage :as st)
 
-# TODO: fix labels
+(defn create-colors [id]
+  @{:backgroundColor "rgb(255, 99, 131)"
+    :borderColor "rgb(255, 99, 131)"})
+
+# TODO: create dates
+(defn create-labels [days-of-data]
+  (range days-of-data))
+
+(defn rec-stats [users-with-recs]
+  (let [all-recs      (flatten (map |(get $0 :recs) users-with-recs))
+        year-days     (map |(get $0 :year-day) all-recs)
+        start-day     (min (splice year-days))
+        end-day       (max (splice year-days))
+        days-of-data  (if (or (nil? start-day) (nil? end-day)) 0
+                        (+ 1 (- end-day start-day)))]
+    @{:start-day (or start-day 0)
+      :end-day (or end-day 0)
+      :days-of-data days-of-data}))
+
+(defn create-dataset [stats]
+  (fn [i user]
+    ```
+    Returns @{
+      :label: 'My First dataset'
+      :backgroundColor: 'rgb(255, 99, 132)'
+      :borderColor: 'rgb(255, 99, 132)'
+      :data: [0, 10, 5, 2, 20, 30, 45]
+    }
+  ```
+    (var user-data @[])
+    # Loop through start-day through end-day and populate user-data
+    (loop [i :range [0 (get stats :days-of-data)]]
+      # rec matching given year-day
+      (def rec (get (filter |(= (get $0 :year-day) (+ i (get stats :start-day))) (get user :recs)) 0))
+      (if (nil? rec)
+        (array/push user-data (common/tail user-data 0))
+        (array/push user-data (+ (common/tail user-data 0) (get rec :amount)))))
+    (let [colors (create-colors i)]
+      @{:label (get user :name)
+        :backgroundColor (get colors :backgroundColor)
+        :borderColor (get colors :borderColor)
+        :data user-data})))
 
 (defn- create-chart [data labels]
   [:script (raw (string "
 const data = {
   labels: " (json/encode labels) ",
-  datasets: " (json/encode data) ",
+  datasets: " (json/encode data) "
 };
 
 const config = {
@@ -23,72 +64,11 @@ const myChart = new Chart(
   config
 );"))])
 
-(defn- year-day-data [user recordings]
-  ```
-  Return a map of amount where key is :year-day + :year
-  ```
-  (var data @{})
-  (loop [r :in recordings :when (= (get user :id) (get r :user-id))]
-    (put data (+ (get r :year) (get r :year-day)) (get r :amount 0)))
-  data)
-
-# Dette er problemet med dynamic typing. Dette hadde vært sååå mye lettere i haskell!
-
-# TODO: this is not finished. It needs to take into considerations the other users data.
-# At some points/labels it might be needed to use 0
-(defn create-dataset [users recordings]
-  ```Create data for chart.js
-
-  Returns @[{
-    label: 'My First dataset',
-    backgroundColor: 'rgb(255, 99, 132)',
-    borderColor: 'rgb(255, 99, 132)',
-    data: [0, 10, 5, 2, 20, 30, 45],
-  }]
-  ```
-  # TODO: year-data is an array, count for that!
-  (def year-data (map |(year-day-data $0 recordings) users))
-  (assert (array? year-data))
-
-  (pp year-data)
-  (def start-day (min (splice (keys year-data))))
-  (def end-day (max (splice (keys year-data))))
-  (pp start-day)
-  (pp end-day)
-  (def data-length (- start-day end-day))
-  (pp data-length))
-
-  # (defn- create-user-dataset [user]
-  #   (var data (array/new data-length))
-  #   # How does this looping works..?
-  #   # (loop [d :in year-data :when (= (get user :id) (get d :user-id))]
-  #   #   (for i 0 data-length
-  #   #     # TODO
-  #   #     (array/insert data i (get d i 0))))
-  #   @{:label (get user :name)
-  #     :backgroundColor "rgb(255, 99, 132)"
-  #     :borderColor "rgb(255, 99, 132)"
-  #     :data data })
-  # (map create-user-dataset users))
-
-# (defn test []
-#   (def id 1)
-#   (def recordings (st/get-recordings id))
-#   (def user-ids (common/unique-user-ids recordings))
-#   (def users (st/get-users user-ids))
-#   (def year-data (map |(year-day-data $0 recordings) users))
-#   (create-dataset users recordings))
-# (test)
-
-(defn create-labels [data recordings]
-  @["Monday" "Tuesday" "Wednesday"])
-
-(defn overview [users recordings]
-  (def data (create-dataset users recordings))
-  (def labels (create-labels data recordings))
-  [:div
-   # TODO: use local chart.js
-    [:script {:src "https://cdn.jsdelivr.net/npm/chart.js"}]
-    [:canvas {:id "chart-overview"}]
-    (create-chart data labels)])
-
+(defn overview [chart-data]
+  (let [users-with-recs (reduce common/padd-users @[] chart-data)
+        stats           (rec-stats users-with-recs)
+        labels          (create-labels (get stats :days-of-data))
+        data            (common/map-indexed (create-dataset stats) users-with-recs)]
+    [:div {:class "big-element"}
+      [:canvas {:id "chart-overview"}]
+      (create-chart data labels)]))

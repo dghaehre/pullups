@@ -17,6 +17,11 @@
     (get rows 0)
     nil))
 
+(defn get-contests
+  "Get all contests"
+  []
+  (db/from :contest))
+
 (defn insert-recording [amount user-id contest-id]
   ```
   Inserting of recording.
@@ -42,8 +47,10 @@
   (def user (db/insert {:db/table :user :name name}))
   (insert-recording 0 (get user :id) contest-id))
 
-(defn get-recordings
-  [contest-id]
+(defn get-recordings [contest-id]
+  ```
+  Get all recordings from a contest
+  ```
   (db/from :recording
            :where {:contest-id contest-id }))
 
@@ -66,21 +73,32 @@
             0))
   ([err _] (do (pp err) 0))))
 
-(defn get-chart-data [contest-id]
-  (db/query
-"select user.id, user.name, recording.amount, recording.year, recording.year_day, (recording.year_day + recording.year) as i from recording left join user on user.id = recording.user_id where recording.contest_id = :id" {:id contest-id}))
+(defn get-chart-data [contest-id &opt year]
+  `
+  Get recordings with user data.
+  Only for one year.
+  `
+  (default year (get (os/date (os/time) :local) :year))
+  (db/query `
+  select
+    user.id as id,
+    user.name,
+    recording.amount,
+    recording.year,
+    recording.year_day,
+    (recording.year_day + recording.year) as i
+  from recording
+    left join user on user.id = recording.user_id
+  where recording.contest_id = :id
+  and recording.year = :year
+  order by recording.created_at DESC` {:id contest-id
+                                       :year year}))
 
 (defn get-user [id]
   (def users (get-users id))
   (if (empty? users)
     nil
     (get users 0)))
-
-# (get-users @[1 2])
-# (get-recordings 1)
-# (create-user "daniel" 1)
-# (get-contest "testing")
-# (contest-exist? "dsf")
 
 # Seems like multiple joins are not supported by db/from
 (defn- get-all
@@ -89,19 +107,12 @@
   (db/from :recording
            :join/one :user))
 
-# (get-all)
-
-(defn- delete-recording
+(defn delete-recording
   "Just a helper function used in development"
   [id]
   (db/delete :recording id))
 
-# (get-recordings 1)
-# (delete-recording 2)
-
-(defn- delete-contest
+(defn delete-contest
   "Just a helper function used in development"
   [id]
   (db/delete :contest id))
-
-# (delete-contest 3)

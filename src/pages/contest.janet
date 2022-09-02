@@ -57,16 +57,15 @@
 
 (defn- main/content
   [contest]
-  (def id (get contest :id))
-  (def recordings (st/get-recordings id))
-  (def user-ids (common/unique-user-ids recordings))
-  (def users (st/get-users user-ids))
-  (def data (common/populate-users users recordings))
-  (pp data)
-  [:main
-   (overview (get contest :name) users)
-   (new-user-form contest)
-   (chart/overview users recordings)])
+  (let [id          (get contest :id)
+        recordings  (st/get-recordings id)
+        user-ids    (common/unique-user-ids recordings)
+        users       (st/get-users user-ids)
+        chart-data  (st/get-chart-data id)]
+    [:main
+     (overview (get contest :name) users)
+     (new-user-form contest)
+     (chart/overview chart-data)]))
 
 (defn- main/user
   [user contest err]
@@ -90,25 +89,26 @@
   (def contest (st/get-contest name))
   (if (nil? contest)
     (redirect-to :home/index)
-    [ (common/header (get contest :name))
+    [[:script {:src "/xxx.chart.js"}]
+     (common/header (get contest :name))
       (main/content contest)
       common/footer ]))
 
 (defn contest/user
   [req]
-  (def query-error (get-in req [:query-string :error]))
-  (def contest-name (get-in req [:params :contest]))
-  (def user-id (get-in req [:params :user-id]))
-  (def contest (st/get-contest contest-name))
-  (if (nil? contest)
-    (redirect-to :home/index))
-  (def user (st/get-user user-id))
-  (if (nil? user)
-    (redirect-to :home/contest {:contest contest-name}))
-  (put user :today (st/get-today-amount (get contest :id) user-id))
-  [ (common/header (get contest :name))
-    (main/user user contest query-error)
-    common/footer ])
+  (let [query-error   (get-in req [:query-string :error])
+        contest-name  (get-in req [:params :contest])
+        user-id       (get-in req [:params :user-id])
+        contest       (st/get-contest contest-name)]
+    (if (nil? contest)
+      (redirect-to :home/index))
+    (def user (st/get-user user-id))
+    (if (nil? user)
+      (redirect-to :home/contest {:contest contest-name}))
+    (put user :today (st/get-today-amount (get contest :id) user-id))
+    [ (common/header (get contest :name))
+      (main/user user contest query-error)
+      common/footer ]))
 
 (defn contest/create-user
   [req]

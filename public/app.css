@@ -5,3 +5,19 @@
   --accent-bg: #22272e;
 }
 
+@media only screen and (min-width: 1200px) {
+  .big-element {
+    width: 150%;
+    right: 25%;
+    position: relative;
+  }
+}
+
+@media only screen and (min-width: 1500px) {
+  .big-element {
+    width: 200%;
+    right: 50%;
+    position: relative;
+  }
+}
+
