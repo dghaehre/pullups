@@ -70,3 +70,10 @@
   (map-indexed (fn [i v] [i v] ) ["a" "b" "c" "d"])
   ```
   (map f (range 0 (length ds)) ds))
+
+(defn flip [f a b]
+  ```
+  Just flips the arguments for the given function.
+  TODO: make this a macro to handle more cases.
+  ```
+  (f b a))

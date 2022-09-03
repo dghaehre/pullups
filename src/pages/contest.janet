@@ -1,4 +1,5 @@
 (use joy)
+# TODO: use 'use' instead of import
 (import ../common :as common)
 (import ../storage :as st)
 (import ../chart :as chart)
@@ -65,6 +66,7 @@
     [:main
      (overview (get contest :name) users)
      (new-user-form contest)
+     # TODO: fetch chart after page load
      (chart/overview chart-data)]))
 
 (defn- main/user
