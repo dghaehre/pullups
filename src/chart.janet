@@ -95,3 +95,12 @@ const myChart = new Chart(
     [:div {:class "big-element"}
       [:canvas {:id "chart-overview"}]
       (create-chart data labels)]))
+
+(defn loader [contest]
+  ```
+  A htmx loader that will fetch chart at load
+  ```
+  [:div {:hx-get      (string "/" contest "/get-chart")
+         :hx-trigger  "load"
+         :id          "chart"
+         :hx-target   "#chart"}])

@@ -56,18 +56,16 @@
     [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
     [:button {:type "submit" :style "width: 100%"} "Add user" ]]])
 
-(defn- main/content
-  [contest]
+(defn- main/content [contest]
   (let [id          (get contest :id)
+        name        (get contest :name)
         recordings  (st/get-recordings id)
         user-ids    (common/unique-user-ids recordings)
-        users       (st/get-users user-ids)
-        chart-data  (st/get-chart-data id)]
+        users       (st/get-users user-ids)] # TODO
     [:main
      (overview (get contest :name) users)
      (new-user-form contest)
-     # TODO: fetch chart after page load
-     (chart/overview chart-data)]))
+     (chart/loader name)]))
 
 (defn- main/user
   [user contest err]
@@ -81,6 +79,7 @@
 # Routes
 
 (route :get "/:contest" :contest/index)
+(route :get "/:contest/get-chart" :contest/get-chart)
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/create-user" :contest/create-user)
 (route :post "/record" :contest/record)
@@ -95,6 +94,18 @@
      (common/header (get contest :name))
       (main/content contest)
       common/footer ]))
+
+(defn contest/get-chart [req]
+  ```
+  Return the chart stuff (html)
+  ```
+  (def name (get-in req [:params :contest]))
+  (def contest (st/get-contest name))
+  (if (nil? contest)
+    (redirect-to :home/index)
+    (->> (get contest :id)
+        (st/get-chart-data)
+        (chart/overview))))
 
 (defn contest/user
   [req]
