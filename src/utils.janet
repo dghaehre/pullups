@@ -32,6 +32,13 @@
     [:span " and " ]
     [:a {:href "https://janet-lang.org"} "Janet"]]])
 
+(defn display-error [err]
+  (let [red {:style "color: #E24556"}
+        grey {:style "color: #DDD9D4"}]
+    [:h5
+     [:span red "[error]: "]
+     [:span grey err]]))
+
 (defmacro with-err
   "Map possible error"
   [err & body]

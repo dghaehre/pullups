@@ -1,8 +1,8 @@
 (use joy)
-(import ../common :as common)
+(use ../utils)
 (import ../storage :as st)
 
-(def- header
+(def- home/header
   [:header
     [:h2 "A pullups competition" ]
     [:h4 "See if you can beat your friends"]])
@@ -16,7 +16,7 @@
   [:button (table/to-struct attr)
     [ "Create competition" ]])
 
-(def- main
+(defn- main [err]
   [:main {:style "text-align: center"}
      [:h3 "Create a competition"]
      [:form {:method "post" :action "/create-contest"}
@@ -27,7 +27,8 @@
                  :hx-trigger "keyup changed delay:200ms, load"
                  :hx-target "#submit"
                  :placeholder "Some wierd name"}]]
-      [:p {:id "submit" } (submit true)]]])
+      [:p {:id "submit" } (submit true)]
+    (if-not (nil? err) (display-error err))]])
 
 
 # Routes
@@ -40,21 +41,25 @@
   "Check if name is available"
   [req]
   (def name (get-in req [:query-string :name]))
-  (def available (and (common/valid-contest-name? name) (not (st/contest-exist? name))))
+  (def available (and (valid-contest-name? name) (not (st/contest-exist? name))))
   (text/html (submit (not available))))
 
-# TODO: handle error
 (defn home/create-contest
   "Create contest"
   [req]
   (def name (get-in req [:body :name]))
-  (st/create-contest name)
-  (redirect-to :contest/index {:contest name}))
+  (try
+    (do
+      (with-err "could not create contest" (st/create-contest name))
+      (redirect-to :contest/index {:contest name}))
+    ([err _] (redirect-to :home/index { :? {:error err }}))))
+
 
 (defn home/index
   "Home screen
   Let user create a new 'contest'"
-  [request]
-  [ header
-   main
-   common/footer ])
+  [req]
+  (let [err (get-in req [:query-string :error])]
+    [ home/header
+     (main err)
+     footer ]))

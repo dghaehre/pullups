@@ -119,16 +119,25 @@
       where year = :year
       and year_day = :year_day
       group by user_id
+    ), topscore as (
+      select
+        MAX(amount) as topscore,
+        user_id
+      from recordings
+      where year = :year
+      group by user_id
     )
 
     select
       u.id,
       u.name,
       coalesce(t.total, 0) as total,
-      coalesce(d.amount, 0) as today
+      coalesce(d.amount, 0) as today,
+      coalesce(s.topscore, 0) as topscore
     from users u
     left join totals t on t.user_id = u.id
     left join todays d on d.user_id = u.id
+    left join topscore s on s.user_id = u.id
 
     ` {:id contest-id
        :year year

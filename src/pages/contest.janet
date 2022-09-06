@@ -1,6 +1,5 @@
 (use joy)
-# TODO: use 'use' instead of import
-(import ../common :as common)
+(use ../utils)
 (import ../storage :as st)
 (import ../chart :as chart)
 
@@ -14,17 +13,19 @@
 
 (defn- overview
   [contest-name users]
-  (defn list [{:id id :name name :total total :today today }]
+  (defn list [{:id id :name name :total total :today today :topscore topscore }]
     [:tr
      [:td
       [:a {:href (string "/" contest-name "/" id) } name ] ]
      [:td today ]
+     [:td topscore ]
      [:td total ]])
   [:table {:style "display: inline-table; margin: 0;" }
    [:thead
     [:tr
      [:th "Name" ]
      [:th "Today" ]
+     [:th "Topscore" ]
      [:th "This year" ]]]
    [:tbody
     (map list users )]])
@@ -71,8 +72,7 @@
    [:h3 (get user :name) ]
    [:hr]
    (record-form contest (get user :id) (get user :today))
-   (if-not (nil? err)
-     [:p {:style "color: pink"} err])])
+   (if-not (nil? err) (display-error err))])
 
 # Routes
 
@@ -89,9 +89,9 @@
   (if (nil? contest)
     (redirect-to :home/index)
     [[:script {:src "/xxx.chart.js"}]
-     (common/header (get contest :name))
+     (header (get contest :name))
       (main/content contest)
-      common/footer ]))
+      footer ]))
 
 (defn contest/get-chart [req]
   ```
@@ -118,9 +118,9 @@
           (redirect-to :contest/index {:contest contest-name})
           (do
             (put user :today (st/get-today-amount user-id))
-            [ (common/header contest-name)
+            [ (header contest-name)
               (main/user user contest query-error)
-              common/footer ]))))))
+              footer ]))))))
 
 (defn contest/create-user
   [req]
@@ -137,7 +137,7 @@
         contest-id (get-in req [:body :contest-id])
         contest-name (get-in req [:body :contest-name])]
     (try
-      (let [amount (common/with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
+      (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
         (st/insert-recording amount user-id contest-id)
         (redirect-to :contest/index {:contest contest-name }))
 
