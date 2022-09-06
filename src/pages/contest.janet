@@ -14,18 +14,18 @@
 
 (defn- overview
   [contest-name users]
-  (defn list [{:id id :name name :alltime alltime :today today }]
+  (defn list [{:id id :name name :total total :today today }]
     [:tr
      [:td
       [:a {:href (string "/" contest-name "/" id) } name ] ]
      [:td today ]
-     [:td alltime ]])
+     [:td total ]])
   [:table {:style "display: inline-table; margin: 0;" }
    [:thead
     [:tr
      [:th "Name" ]
      [:th "Today" ]
-     [:th "All time" ]]]
+     [:th "This year" ]]]
    [:tbody
     (map list users )]])
 
@@ -59,9 +59,7 @@
 (defn- main/content [contest]
   (let [id          (get contest :id)
         name        (get contest :name)
-        recordings  (st/get-recordings id)
-        user-ids    (common/unique-user-ids recordings)
-        users       (st/get-users user-ids)] # TODO
+        users       (st/contents-stats id)] # TODO
     [:main
      (overview (get contest :name) users)
      (new-user-form contest)
@@ -114,14 +112,15 @@
         user-id       (get-in req [:params :user-id])
         contest       (st/get-contest contest-name)]
     (if (nil? contest)
-      (redirect-to :home/index))
-    (def user (st/get-user user-id))
-    (if (nil? user)
-      (redirect-to :home/contest {:contest contest-name}))
-    (put user :today (st/get-today-amount (get contest :id) user-id))
-    [ (common/header (get contest :name))
-      (main/user user contest query-error)
-      common/footer ]))
+      (redirect-to :home/index)
+      (let [user (st/get-user-from-contest (get contest :id) user-id)]
+        (if (nil? user)
+          (redirect-to :contest/index {:contest contest-name})
+          (do
+            (put user :today (st/get-today-amount user-id))
+            [ (common/header contest-name)
+              (main/user user contest query-error)
+              common/footer ]))))))
 
 (defn contest/create-user
   [req]
