@@ -61,8 +61,8 @@
       # rec matching given year-day
       (def rec (get (filter |(= (get $0 :year-day) (+ i (get stats :start-day))) (get user :recs)) 0))
       (if (nil? rec)
-        (array/push user-data (tail user-data 0))
-        (array/push user-data (+ (tail user-data 0) (get rec :amount)))))
+        (array/push user-data (end user-data 0))
+        (array/push user-data (+ (end user-data 0) (get rec :amount)))))
     (let [colors (create-colors i)]
       @{:label (get user :name)
         :backgroundColor (get colors :backgroundColor)

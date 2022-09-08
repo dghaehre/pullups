@@ -13,14 +13,7 @@
 
 (defn- overview
   [contest-name users]
-  (defn list [{:id id :name name :total total :today today :topscore topscore }]
-    [:tr
-     [:td
-      [:a {:href (string "/" contest-name "/" id) } name ] ]
-     [:td today ]
-     [:td topscore ]
-     [:td total ]])
-  [:table {:style "display: inline-table; margin: 0;" }
+  [:table {:style "display: inline-table; margin: 0;" :class "contest-table" }
    [:thead
     [:tr
      [:th "Name" ]
@@ -28,17 +21,22 @@
      [:th "Topscore" ]
      [:th "This year" ]]]
    [:tbody
-    (map list users )]])
+    (flip map users (fn [{:id id :name name :total total :today today :topscore topscore }]
+      [:tr
+       [:td
+        [:a {:href (string "/" contest-name "/" id) } name ] ]
+       [:td today ]
+       [:td topscore ]
+       [:td total ]]))]])
 
 (defn- record-form
   "Where you record your daily stuff..."
   [contest user-id current-amount]
-  (def t (os/date (os/time) :local))
-  (def tmin (string (get t :year) "-0" (+ 1 (get t :month)) "-0" (get t :month-day)))
-  (def tmax (string (get t :year) "-0" (+ 1 (get t :month)) "-0" (+ (get t :month-day) 1)))
+  (def {:year year :month m :month-day md :hours h :minutes mn} (os/date (os/time) :local))
    [:form {:method "post" :action "/record" }
     [:p
-      [:label [:p "Today"]]
+      [:label [:h3 "Today"]
+              [:p {:style "color: grey; margin: 0px"} (string md "/" m "/" year "  " h ":" mn)]]
       [:input {:type "text" :placeholder current-amount :name "amount"} ]]
     [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
     [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
@@ -49,7 +47,7 @@
 
 (defn- new-user-form
   [contest]
-  [:details
+  [:details {:class "new-user-form" }
    [:summary "Add user" ]
    [:form {:method "post" :action "/create-user" }
     [:input {:type "text" :placeholder "Name" :name "name"} ]
@@ -57,13 +55,14 @@
     [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
     [:button {:type "submit" :style "width: 100%"} "Add user" ]]])
 
-(defn- main/content [contest]
+(defn- main/content [contest err]
   (let [id          (get contest :id)
         name        (get contest :name)
         users       (st/contents-stats id)] # TODO
     [:main
      (overview (get contest :name) users)
      (new-user-form contest)
+     (if-not (nil? err) (display-error err))
      (chart/loader name)]))
 
 (defn- main/user
@@ -84,14 +83,15 @@
 
 (defn contest/index
   [req]
-  (def name (get-in req [:params :contest]))
-  (def contest (st/get-contest name))
-  (if (nil? contest)
-    (redirect-to :home/index)
-    [[:script {:src "/xxx.chart.js"}]
-     (header (get contest :name))
-      (main/content contest)
-      footer ]))
+  (let [name        (get-in req [:params :contest])
+        err         (get-in req [:query-string :error])
+        contest     (st/get-contest name)]
+    (if (nil? contest)
+      (redirect-to :home/index)
+      [[:script {:src "/xxx.chart.js"}]
+       (header (get contest :name))
+        (main/content contest err)
+        footer ])))
 
 (defn contest/get-chart [req]
   ```
@@ -107,7 +107,7 @@
 
 (defn contest/user
   [req]
-  (let [query-error   (get-in req [:query-string :error])
+  (let [err           (get-in req [:query-string :error])
         contest-name  (get-in req [:params :contest])
         user-id       (get-in req [:params :user-id])
         contest       (st/get-contest contest-name)]
@@ -119,17 +119,21 @@
           (do
             (put user :today (st/get-today-amount user-id))
             [ (header contest-name)
-              (main/user user contest query-error)
+              (main/user user contest err)
               footer ]))))))
 
 (defn contest/create-user
   [req]
-  (pp req)
   (def name (get-in req [:body :name]))
   (def contest-id (get-in req [:body :contest-id]))
   (def contest-name (get-in req [:body :contest-name]))
-  (st/create-user name contest-id)
-  (redirect-to :contest/index {:contest contest-name }))
+  (pp name)
+  (if (-> name (string/trim) (empty?))
+    (redirect-to :contest/index {:contest contest-name
+                                 :? {:error "empty user name" }})
+    (do
+      (st/create-user name contest-id)
+      (redirect-to :contest/index {:contest contest-name }))))
 
 (defn contest/record
   [req]

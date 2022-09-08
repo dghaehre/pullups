@@ -21,3 +21,16 @@
   }
 }
 
+@media only screen and (max-width: 600px) {
+  .contest-table {
+    font-size: 15px;
+  }
+
+  .new-user-form {
+    font-size: 15px;
+  }
+
+  .new-user-form button {
+    font-size: 15px;
+  }
+}

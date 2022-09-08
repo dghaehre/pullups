@@ -36,7 +36,7 @@
   (let [red {:style "color: #E24556"}
         grey {:style "color: #DDD9D4"}]
     [:h5
-     [:span red "[error]: "]
+     [:span red "[error] "]
      [:span grey err]]))
 
 (defmacro with-err
@@ -67,7 +67,8 @@
                                     :year-day (get rec :year-day)}]}))
   users)
 
-(defn tail [arr &opt none]
+# TODO: use dghaehre/janet-utils instead
+(defn end [arr &opt none]
   `Take last element of list`
   (get arr (- (length arr) 1) none))
 
@@ -78,9 +79,11 @@
   ```
   (map f (range 0 (length ds)) ds))
 
-(defn flip [f a b]
+(defmacro flip [f & args]
   ```
-  Just flips the arguments for the given function.
-  TODO: make this a macro to handle more cases.
+  Flip argument for the given function.
+  Last argument becomes the first.
+  Second argument becomes second.
+  Third becomes third etc.
   ```
-  (f b a))
+  ~(,f ,(end args) ,;(drop 1 (reverse args))))
