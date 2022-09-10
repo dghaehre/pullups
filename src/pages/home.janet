@@ -4,21 +4,21 @@
 
 (def- home/header
   [:header
-    [:h2 "A pullups competition" ]
+    [:h2 "Daily pullups" ]
     [:h4 "See if you can beat your friends"]])
 
 (defn- submit
   "Create competition button"
   [disabled]
-  (def attr @{:type "submit" })
-  (if disabled
-    (put attr :disabled true))
-  [:button (table/to-struct attr)
-    [ "Create competition" ]])
+  (let [attr @{:type "submit" }]
+    (if disabled
+      (put attr :disabled true))
+    [:button (table/to-struct attr)
+      [ "Create competition" ]]))
 
 (defn- main [err]
   [:main {:style "text-align: center"}
-     [:h3 "Create a competition"]
+     [:h3 "Create new competition"]
      [:form {:method "post" :action "/create-contest"}
       [:p
         [:input {:type "text"
@@ -26,8 +26,11 @@
                  :hx-get "/check-name"
                  :hx-trigger "keyup changed delay:200ms, load"
                  :hx-target "#submit"
-                 :placeholder "Some wierd name"}]]
+                 :placeholder "Name of your group"}]]
       [:p {:id "submit" } (submit true)]
+      [:p {:style "margin-top: 100px"}]
+      [:p "See who can do the most pullups in 2022"]
+      [:p "When you have created a name for your group, you can add participants"]
     (if-not (nil? err) (display-error err))]])
 
 

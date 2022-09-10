@@ -32,17 +32,17 @@
 (defn- record-form
   "Where you record your daily stuff..."
   [contest user-id current-amount]
-  (def {:year year :month m :month-day md :hours h :minutes mn} (os/date (os/time) :local))
+  (def {:year year :month m :month-day md} (os/date (os/time) :local))
    [:form {:method "post" :action "/record" }
     [:p
-      [:label [:h3 "Today"]
-              [:p {:style "color: grey; margin: 0px"} (string md "/" m "/" year "  " h ":" mn)]]
+      [:label [:h4 "Total pullups today"]
+              [:p {:style "color: grey; margin: 0px"} (string md "/" m "/" year)]]
       [:input {:type "text" :placeholder current-amount :name "amount"} ]]
     [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
     [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
     [:input {:type "hidden" :name "user-id" :value user-id } ]
     [:p 
-      [:button {:type "submit"} "Record" ]]])
+      [:button {:type "submit"} "Update" ]]])
 
 
 (defn- new-user-form

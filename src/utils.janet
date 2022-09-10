@@ -21,15 +21,16 @@
 (defn header
   [name]
   [:header
-    [:h3 {:style "margin: 20px 0px -5px"}
-     [:a {:href (string "/" name)} name ]]])
+    [:a {:href (string "/" name)
+         :style "color: var(--text); text-decoration: none;" }
+      [:h3 {:style "margin: 20px 0px -5px"} name ]]])
 
 (def footer
   [:footer
    [:p {:style "text-align: center" }
-    [:span "Made with love by " ]
+    [:span "Made by " ]
     [:a {:href "https://dghaehre.com"} "Daniel"]
-    [:span " and " ]
+    [:span " using " ]
     [:a {:href "https://janet-lang.org"} "Janet"]]])
 
 (defn display-error [err]
