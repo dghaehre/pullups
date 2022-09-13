@@ -30,3 +30,10 @@ CREATE TABLE mapping (
   foreign key(contest_id) references contest(id),
   UNIQUE (user_id, contest_id)
 )
+CREATE TABLE feedback (
+  id integer primary key,
+  message text not null,
+  contest_id integer,
+  created_at integer not null default(strftime('%s', 'now')),
+  updated_at integer
+)

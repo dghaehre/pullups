@@ -65,4 +65,4 @@
   (let [err (get-in req [:query-string :error])]
     [ home/header
      (main err)
-     footer ]))
+     (footer req) ]))

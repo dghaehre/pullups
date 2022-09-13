@@ -91,7 +91,7 @@
       [[:script {:src "/xxx.chart.js"}]
        (header (get contest :name))
         (main/content contest err)
-        footer ])))
+        (footer req (get contest :id)) ])))
 
 (defn contest/get-chart [req]
   ```
@@ -120,7 +120,7 @@
             (put user :today (st/get-today-amount user-id))
             [ (header contest-name)
               (main/user user contest err)
-              footer ]))))))
+              (footer req (get contest :id)) ]))))))
 
 (defn contest/create-user
   [req]

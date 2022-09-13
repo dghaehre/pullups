@@ -25,20 +25,41 @@
          :style "color: var(--text); text-decoration: none;" }
       [:h3 {:style "margin: 20px 0px -5px"} name ]]])
 
-(def footer
-  [:footer
-   [:p {:style "text-align: center" }
-    [:span "Made by " ]
-    [:a {:href "https://dghaehre.com"} "Daniel"]
-    [:span " using " ]
-    [:a {:href "https://janet-lang.org"} "Janet"]]])
-
 (defn display-error [err]
   (let [red {:style "color: #E24556"}
         grey {:style "color: #DDD9D4"}]
     [:h5
      [:span red "[error] "]
      [:span grey err]]))
+
+(defn display-success [msg]
+  (let [grey {:style "color: #DDD9D4"}] #TODO
+    [:h5 grey msg]))
+
+(defn footer [req &opt contest-id]
+  (let [success     (get-in req [:query-string :feedback-success])
+        err         (get-in req [:query-string :feedback-error])]
+    [:footer {:style "margin-top: 10rem"}
+      (if-not (nil? success)
+        (display-success success))
+      (if-not (nil? err)
+        (display-error err))
+    [:p {:style "text-align: center" }
+      [:span "Made by " ]
+      [:a {:href "https://dghaehre.com"} "Daniel"]
+      [:span " using " ]
+      [:a {:href "https://janet-lang.org"} "Janet"]]
+    [:p
+      [:form {:method "post" :action "/feedback"}
+      [:p "For feedback or requests:" ]
+      (if-not (nil? contest-id)
+        [:input {:type "hidden"
+                 :name "contest"
+                 :value contest-id}])
+      [:p [:input {:type "text"
+                   :name "message"
+                   :placeholder ""}]]
+      [:button {:style "margin: 0px; padding: 8px;"} "Send feedback"]]]]))
 
 (defmacro with-err
   "Map possible error"

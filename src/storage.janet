@@ -3,7 +3,7 @@
 (defn contest-exist?
   "Check db if name already exist"
   [name]
-  (not (empty? (db/from :contest :where {:name name} :limit 1))))
+  (not (nil? (db/find-by :contest :where {:name name}))))
 
 (defn create-contest
   [name]
@@ -12,15 +12,23 @@
 (defn get-contest
   "Get contest. Returns nil if not found."
   [name]
-  (def rows (db/from :contest :where {:name name}))
-  (if (= 1 (length rows))
-    (get rows 0)
-    nil))
+  (db/find-by :contest :where {:name name}))
+
+(defn get-contest-from-id [id]
+  (db/find :contest id))
 
 (defn get-contests
   "Get all contests"
   []
   (db/from :contest))
+
+(defn insert-feedback [message &opt contest-id]
+  (db/insert {:db/table :feedback
+              :message message
+              :contest_id contest-id}))
+
+(defn get-feedbacks []
+  (db/from :feedback))
 
 (defn insert-recording [amount user-id contest-id]
   ```
