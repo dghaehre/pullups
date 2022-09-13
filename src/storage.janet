@@ -138,6 +138,7 @@
     left join totals t on t.user_id = u.id
     left join todays d on d.user_id = u.id
     left join topscore s on s.user_id = u.id
+    order by total DESC
 
     ` {:id contest-id
        :year year
