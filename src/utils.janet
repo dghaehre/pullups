@@ -109,3 +109,11 @@
   Third becomes third etc.
   ```
   ~(,f ,(end args) ,;(drop 1 (reverse args))))
+
+(defn time-by-change [change]
+  (let [time (os/time)
+        day (* 60 60 24)]
+    (case change
+      :yesterday (- time day)
+      :tomorrow (+ time day)
+      time)))

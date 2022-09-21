@@ -5,6 +5,15 @@
   --accent-bg: #22272e;
 }
 
+.date-arrow {
+  color: grey;
+}
+
+.date-arrow:hover {
+  color: white;
+  cursor: pointer;
+}
+
 @media only screen and (min-width: 1200px) {
   .big-element {
     width: 150%;

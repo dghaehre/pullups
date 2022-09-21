@@ -30,13 +30,14 @@
 (defn get-feedbacks []
   (db/from :feedback))
 
-(defn insert-recording [amount user-id contest-id]
+(defn insert-recording [amount user-id contest-id &opt time]
   ```
   Inserting of recording.
   If we already find a similar recording for the same day,
   we update instead of inserting.
   ```
-  (let [{:year-day year-day :year year } (os/date (os/time) :local)]
+  (default time (os/time))
+  (let [{:year-day year-day :year year } (os/date time :local)]
         (db/insert {:db/table :recording
                     :amount amount
                     :user_id user-id
@@ -85,10 +86,11 @@
   and m.contest_id = :contestid` {:contestid contest-id}))
 
 # TODO: remove
-(defn get-today-amount [user-id]
+(defn get-today-amount [user-id &opt time]
   "Get todays amount for given user"
+  (default time (os/time))
   (try
-    (let [{:year-day year-day :year year } (os/date (os/time) :local)]
+    (let [{:year-day year-day :year year } (os/date time :local)]
       (or (-?> (db/from :recording
                         :where {:user-id user-id
                                 :year year

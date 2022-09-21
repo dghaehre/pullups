@@ -1,6 +1,7 @@
 (use joy)
 (use ./pages/home)
 (use ./pages/contest)
+(use ./pages/user)
 (use ./feedback)
 
 # Layout
