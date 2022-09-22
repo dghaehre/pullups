@@ -7,49 +7,48 @@
 (route :post "/create-user" :contest/create-user)
 (route :get "/:contest/:user/get-record-form/:change" :contest/get-record-form)
 
-(defn- record-form
+(defn- record-form [contest user-id current-amount &opt time change]
   "Where you record your daily stuff..."
-  [contest user-id current-amount &opt time change]
   (default time (os/time))
-  (def not-today (not (or (= change :yesterday) (= change :tomorrow))))
-  (def {:year year :month m :month-day md} (os/date time :local))
-  (def empty-arrow [:span {:style "margin-right: 12px; margin-left: 12px;" :class "date-arrow"} "   "])
   (defn new-change [c]
     (case [change (keyword c)]
       [:yesterday :tomorrow] "today"
       [:tomorrow :yesterday] "today"
       c))
-   [:form {:method "post" :action "/record" }
-    [:p
-      [:label [:h4 "Total pullups"]]]
-    [:p
-      (if (= change :yesterday)
-        empty-arrow
-        [:span {:style "margin-right: 10px;"
-                :class "date-arrow"
-                :hx-trigger "click"
-                :hx-get (string "/" (get contest :name) "/" user-id "/get-record-form/" (new-change "yesterday"))
-                :hx-target "#record-form"}
-         "⬅"])
-      [:span {:style "color: grey; margin: 0px;"} (string md "/" m "/" year)]
-      (if (= change :tomorrow)
-        empty-arrow
-        [:span {:style "margin-left: 10px;"
-                :class "date-arrow"
-                :hx-trigger "click"
-                :hx-get (string "/" (get contest :name) "/" user-id "/get-record-form/" (new-change "tomorrow"))
-                :hx-target "#record-form"}
-         "➡"])]
-    [:p
-      [:input {:type "text" :placeholder current-amount :name "amount"} ]]
-    [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
-    [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
-    [:input {:type "hidden" :name "year" :value year } ]
-    [:input {:type "hidden" :name "month-day" :value md } ]
-    [:input {:type "hidden" :name "change" :value change } ]
-    [:input {:type "hidden" :name "user-id" :value user-id } ]
-    [:p 
-      [:button {:type "submit"} "Update" ]]])
+  (let [{:year year :month m :month-day md} (os/date time :local)
+        day                                 (+ 1 md)
+        empty-arrow [:span {:style "margin-right: 12px; margin-left: 12px;" :class "date-arrow"} "   "]]
+     [:form {:method "post" :action "/record" }
+      [:p
+        [:label [:h4 "Total pullups"]]]
+      [:p
+        (if (= change :yesterday)
+          empty-arrow
+          [:span {:style "margin-right: 10px;"
+                  :class "date-arrow"
+                  :hx-trigger "click"
+                  :hx-get (string "/" (get contest :name) "/" user-id "/get-record-form/" (new-change "yesterday"))
+                  :hx-target "#record-form"}
+           "⬅"])
+        [:span {:style "color: grey; margin: 0px;"} (string day "/" m "/" year)]
+        (if (= change :tomorrow)
+          empty-arrow
+          [:span {:style "margin-left: 10px;"
+                  :class "date-arrow"
+                  :hx-trigger "click"
+                  :hx-get (string "/" (get contest :name) "/" user-id "/get-record-form/" (new-change "tomorrow"))
+                  :hx-target "#record-form"}
+           "➡"])]
+      [:p
+        [:input {:type "text" :placeholder current-amount :name "amount"} ]]
+      [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
+      [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
+      [:input {:type "hidden" :name "year" :value year } ]
+      [:input {:type "hidden" :name "month-day" :value md } ]
+      [:input {:type "hidden" :name "change" :value change } ]
+      [:input {:type "hidden" :name "user-id" :value user-id } ]
+      [:p 
+        [:button {:type "submit"} "Update" ]]]))
 
 (defn- layout
   [user contest err]
