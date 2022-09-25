@@ -108,11 +108,11 @@ const myChart"(string typ)" = new Chart(
       (create-chart data-agg labels :aggregate)
       (create-chart data-daily labels :daily)]))
 
-(defn loader [contest]
+(defn loader [contest-name]
   ```
   A htmx loader that will fetch chart at load
   ```
-  [:div {:hx-get      (string "/" contest "/get-chart")
+  [:div {:hx-get      (string "/" (cname contest-name) "/get-chart")
          :hx-trigger  "load"
          :id          "chart"
          :hx-target   "#chart"}])

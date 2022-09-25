@@ -55,7 +55,7 @@
   (try
     (do
       (with-err "could not create contest" (st/create-contest name))
-      (redirect-to :contest/index {:contest name}))
+      (redirect-to :contest/index {:contest (cname name)}))
     ([err _] (redirect-to :home/index { :? {:error err }}))))
 
 

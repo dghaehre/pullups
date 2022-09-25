@@ -28,7 +28,7 @@
           [:span {:style "margin-right: 10px;"
                   :class "date-arrow"
                   :hx-trigger "click"
-                  :hx-get (string "/" (get contest :name) "/" user-id "/get-record-form/" (new-change "yesterday"))
+                  :hx-get (string "/" (cname (get contest :name)) "/" user-id "/get-record-form/" (new-change "yesterday"))
                   :hx-target "#record-form"}
            "⬅"])
         [:span {:style "color: grey; margin: 0px;"} (string day "/" m "/" year)]
@@ -65,7 +65,7 @@
   (def contest-id (get-in req [:body :contest-id]))
   (def contest-name (get-in req [:body :contest-name]))
   (if (-> name (string/trim) (empty?))
-    (redirect-to :contest/index {:contest contest-name
+    (redirect-to :contest/index {:contest (cname contest-name)
                                  :? {:error "empty user name" }})
     (do
       (st/create-user name contest-id)
@@ -92,7 +92,7 @@
       (redirect-to :home/index)
       (let [user (st/get-user-from-contest (get contest :id) user-id)]
         (if (nil? user)
-          (redirect-to :contest/index {:contest contest-name})
+          (redirect-to :contest/index {:contest (cname contest-name)})
           (do
             (put user :today (st/get-today-amount user-id))
             [ (header contest-name)
@@ -109,9 +109,9 @@
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
         (pp change)
         (st/insert-recording amount user-id contest-id (time-by-change (keyword change)))
-        (redirect-to :contest/index {:contest contest-name }))
+        (redirect-to :contest/index {:contest (cname contest-name) }))
 
       ([err fib]
-        (redirect-to :contest/user { :contest contest-name
+        (redirect-to :contest/user { :contest (cname contest-name)
                                     :user-id user-id
                                     :? {:error err }})))))

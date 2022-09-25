@@ -90,3 +90,9 @@
       :yesterday (- time day)
       :tomorrow (+ time day)
       time)))
+
+(defn cname [name]
+  (string/replace-all " " "-" name))
+
+(defn from-cname [name]
+  (string/replace-all "-" " " name))

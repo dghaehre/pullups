@@ -1,11 +1,12 @@
 (use joy)
+(use ./utils)
 
 (defn contest-exist?
   "Check db if name already exist"
   [name]
   (let [rows (db/query `
     select * from contest
-    where upper(name) = upper(:name)` {:name (string/replace "-" " " name)})]
+    where upper(name) = upper(:name)` {:name (from-cname name)})]
     (not (nil? (get rows 0)))))
 
 (defn create-contest
@@ -17,7 +18,7 @@
   [name]
   (let [rows (db/query `
     select * from contest
-    where upper(name) = upper(:name)` {:name (string/replace "-" " " name)})]
+    where upper(name) = upper(:name)` {:name (from-cname name)})]
     (get rows 0)))
 
 (defn get-contest-from-id [id]
