@@ -45,7 +45,8 @@
 #       users-with-recs (reduce padd-users @[] chart-data)
 #       stats           (rec-stats users-with-recs)
 #   (map-indexed (create-dataset stats) users-with-recs))
-(defn create-dataset [stats]
+(defn create-dataset [stats &opt typ]
+  (default typ :aggregate)
   (fn [i user]
     ```
     Returns @{
@@ -61,7 +62,9 @@
       # rec matching given year-day
       (def rec (get (filter |(= (get $0 :year-day) (+ i (get stats :start-day))) (get user :recs)) 0))
       (if (nil? rec)
-        (array/push user-data (end user-data 0))
+        (match typ
+          :aggregate  (array/push user-data (end user-data 0))
+          :daily      (array/push user-data 0))
         (array/push user-data (+ (end user-data 0) (get rec :amount)))))
     (let [colors (create-colors i)]
       @{:label (get user :name)
@@ -69,32 +72,38 @@
         :borderColor (get colors :borderColor)
         :data user-data})))
 
-(defn- create-chart [data labels]
+(defn- create-chart [data labels typ]
   [:script (raw (string "
-const data = {
+const data"(string typ)" = {
   labels: " (json/encode labels) ",
   datasets: " (json/encode data) "
 };
 
-const config = {
+const config"(string typ)" = {
   type: 'line',
-  data: data,
+  data: data"(string typ)",
   options: {}
 };
 
-const myChart = new Chart(
-  document.getElementById('chart-overview'),
-  config
+const myChart"(string typ)" = new Chart(
+  document.getElementById('chart-" (string typ)"'),
+  config"(string typ)"
 );"))])
 
 (defn overview [chart-data]
   (let [users-with-recs (reduce padd-users @[] chart-data)
         stats           (rec-stats users-with-recs)
         labels          (create-labels (get stats :days-of-data))
-        data            (map-indexed (create-dataset stats) users-with-recs)]
+        data-agg        (map-indexed (create-dataset stats :aggregate) users-with-recs)
+        data-daily      (map-indexed (create-dataset stats :daily) users-with-recs)]
     [:div {:class "big-element"}
-      [:canvas {:id "chart-overview"}]
-      (create-chart data labels)]))
+      [:h4 {:style "text-align: right; color: grey;"} "Total aggregate"]
+      [:canvas {:id "chart-aggregate"}]
+      [:br]
+      [:h4 {:style "text-align: right; color: grey;"} "Daily count"]
+      [:canvas {:id "chart-daily"}]
+      (create-chart data-agg labels :aggregate)
+      (create-chart data-daily labels :daily)]))
 
 (defn loader [contest]
   ```
