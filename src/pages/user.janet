@@ -69,7 +69,7 @@
                                  :? {:error "empty user name" }})
     (do
       (st/create-user name contest-id)
-      (redirect-to :contest/index {:contest contest-name }))))
+      (redirect-to :contest/index {:contest (cname contest-name) }))))
 
 # TODO; handle error
 (defn contest/get-record-form [req]
