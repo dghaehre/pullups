@@ -65,7 +65,9 @@
         (match typ
           :aggregate  (array/push user-data (end user-data 0))
           :daily      (array/push user-data 0))
-        (array/push user-data (+ (end user-data 0) (get rec :amount)))))
+        (match typ
+          :aggregate  (array/push user-data (+ (end user-data 0) (get rec :amount)))
+          :daily      (array/push user-data (get rec :amount)))))
     (let [colors (create-colors i)]
       @{:label (get user :name)
         :backgroundColor (get colors :backgroundColor)
