@@ -16,7 +16,7 @@
       [:meta {:name "csrf-token" :content (csrf-token-value request)}] # Dont currently need that
       [:link {:href "/simple.min.css" :rel "stylesheet"}]
       [:script {:src "/htmx.min.js" :defer ""}]
-      [:link {:href "/app.css" :rel "stylesheet"}]]
+      [:link {:href "/app.v2.css" :rel "stylesheet"}]]
      [:body
        body]]))
 
