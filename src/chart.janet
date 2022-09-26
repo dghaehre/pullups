@@ -115,4 +115,5 @@ const myChart"(string typ)" = new Chart(
   [:div {:hx-get      (string "/" (cname contest-name) "/get-chart")
          :hx-trigger  "load"
          :id          "chart"
+         :class       "chart-loader"
          :hx-target   "#chart"}])
