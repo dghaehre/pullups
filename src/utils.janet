@@ -61,12 +61,6 @@
                    :placeholder ""}]]
       [:button {:style "margin: 0px; padding: 8px;"} "Send feedback"]]]]))
 
-(defmacro with-err
-  "Map possible error"
-  [err & body]
-  ~(try ,;body ([_] (error ,err))))
-
-
 (defn padd-users [users rec]
   ```
   Takes a list of users and one recording.
@@ -88,27 +82,6 @@
                                     :year (get rec :year)
                                     :year-day (get rec :year-day)}]}))
   users)
-
-# TODO: use dghaehre/janet-utils instead
-(defn end [arr &opt none]
-  `Take last element of list`
-  (get arr (- (length arr) 1) none))
-
-(defn map-indexed [f ds]
-  ```
-  A map that also provide an index
-  (map-indexed (fn [i v] [i v] ) ["a" "b" "c" "d"])
-  ```
-  (map f (range 0 (length ds)) ds))
-
-(defmacro flip [f & args]
-  ```
-  Flip argument for the given function.
-  Last argument becomes the first.
-  Second argument becomes second.
-  Third becomes third etc.
-  ```
-  ~(,f ,(end args) ,;(drop 1 (reverse args))))
 
 (defn time-by-change [change]
   (let [time (os/time)
