@@ -3,7 +3,10 @@
 (defn contest-exist?
   "Check db if name already exist"
   [name]
-  (not (nil? (db/find-by :contest :where {:name name}))))
+  (let [rows (db/query `
+    select * from contest
+    where upper(name) = upper(:name)` {:name (string/replace "-" " " name)})]
+    (not (nil? (get rows 0)))))
 
 (defn create-contest
   [name]
@@ -12,7 +15,10 @@
 (defn get-contest
   "Get contest. Returns nil if not found."
   [name]
-  (db/find-by :contest :where {:name name}))
+  (let [rows (db/query `
+    select * from contest
+    where upper(name) = upper(:name)` {:name (string/replace "-" " " name)})]
+    (get rows 0)))
 
 (defn get-contest-from-id [id]
   (db/find :contest id))
