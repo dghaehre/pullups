@@ -25,7 +25,7 @@
     (flip map users (fn [{:id id :name name :total total :today today :topscore topscore }]
       [:tr
        [:td
-        [:a {:href (string "/" contest-name "/" id) } name ] ]
+        [:a {:href (string "/" (cname contest-name) "/" id) } name ] ]
        [:td today ]
        [:td topscore ]
        [:td total ]]))]])
