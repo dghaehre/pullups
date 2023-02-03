@@ -46,6 +46,9 @@
 #       users-with-recs (reduce padd-users @[] chart-data)
 #       stats           (rec-stats users-with-recs)
 #   (map-indexed (create-dataset stats) users-with-recs))
+
+# TODO: handle month...
+# Month should possibly be handled in a different function..
 (defn create-dataset [stats &opt typ]
   (default typ :aggregate)
   (fn [i user]
@@ -100,7 +103,7 @@ const myChart"(string typ)" = new Chart(
         data-agg        (map-indexed (create-dataset stats :aggregate) users-with-recs)
         data-daily      (map-indexed (create-dataset stats :daily) users-with-recs)]
     [:div {:class "big-element"}
-      [:h4 {:style "text-align: right; color: grey;"} "Total aggregate"]
+      [:h4 {:style "text-align: right; color: grey;"} "This year"]
       [:canvas {:id "chart-aggregate"}]
       [:br]
       [:h4 {:style "text-align: right; color: grey;"} "Daily count"]

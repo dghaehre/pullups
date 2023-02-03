@@ -39,7 +39,7 @@
 (defn footer [req &opt contest-id]
   (let [success     (get-in req [:query-string :feedback-success])
         err         (get-in req [:query-string :feedback-error])]
-    [:footer {:style "margin-top: 10rem"}
+    [:footer {:style "margin-top: 35rem"}
       (if-not (nil? success)
         (display-success success))
       (if-not (nil? err)
@@ -65,7 +65,7 @@
   ```
   Takes a list of users and one recording.
   Returns a new list of users where the recording either
-  has been padded to the existing user or had been added to
+  has been padded to the existing user or has been added to
   a new user in the list.
   ```
   (var exist false)
@@ -73,6 +73,7 @@
     (do
       (put u :recs (array/concat (get u :recs) @{:amount (get rec :amount)
                                               :year (get rec :year)
+                                              :created-at (get rec :created-at)
                                               :year-day (get rec :year-day)}))
       (set exist true)))
   (if-not exist
@@ -80,6 +81,7 @@
                           :name (get rec :name)
                           :recs @[@{:amount (get rec :amount)
                                     :year (get rec :year)
+                                    :created-at (get rec :created-at)
                                     :year-day (get rec :year-day)}]}))
   users)
 

@@ -109,57 +109,70 @@
 
 (defn contents-stats [contest-id]
   ```
- Returns the users in the given contest with todays amount and
- total amount THIS YEAR
+ Returns the users in the given contest with:
+ - todays amount
+ - total amount THIS YEAR
+ - total amount THIS MONTH
  ```
-  (def {:year year :year-day year-day} (os/date (os/time) :local))
-  (db/query `
-    with users as (
-      select * from user
-      inner join mapping on mapping.user_id = user.id
-      and mapping.contest_id = :id
-    ), recordings as (
-      select * from recording
-      inner join users on users.id = recording.user_id
-    ), totals as (
+  (let [now (os/time)
+        {:year year :year-day year-day :month-day md} (os/date now :local)
+        day-in-seconds (* 60 60 24)
+        start-of-month (- now (* day-in-seconds md))]
+    (db/query `
+      with users as (
+        select * from user
+        inner join mapping on mapping.user_id = user.id
+        and mapping.contest_id = :id
+      ), recordings as (
+        select * from recording
+        inner join users on users.id = recording.user_id
+      ), totals as (
+        select
+          SUM(amount) as total,
+          user_id
+        from recordings
+        where year = :year
+        group by user_id
+      ), todays as (
+        select
+          amount,
+          user_id
+        from recordings
+        where year = :year
+        and year_day = :year_day
+        group by user_id
+      ), month as (
+        select
+          SUM(amount) as total,
+          user_id
+        from recordings
+        where created_at > :month
+        group by user_id
+      ), topscore as (
+        select
+          MAX(amount) as topscore,
+          user_id
+        from recordings
+        where year = :year
+        group by user_id
+      )
       select
-        SUM(amount) as total,
-        user_id
-      from recordings
-      where year = :year
-      group by user_id
-    ), todays as (
-      select
-        amount,
-        user_id
-      from recordings
-      where year = :year
-      and year_day = :year_day
-      group by user_id
-    ), topscore as (
-      select
-        MAX(amount) as topscore,
-        user_id
-      from recordings
-      where year = :year
-      group by user_id
-    )
-
-    select
-      u.id,
-      u.name,
-      coalesce(t.total, 0) as total,
-      coalesce(d.amount, 0) as today,
-      coalesce(s.topscore, 0) as topscore
-    from users u
-    left join totals t on t.user_id = u.id
-    left join todays d on d.user_id = u.id
-    left join topscore s on s.user_id = u.id
-    order by total DESC
-
-    ` {:id contest-id
-       :year year
-       :year_day year-day}))
+        u.id,
+        u.name,
+        coalesce(t.total, 0) as total,
+        coalesce(m.total, 0) as month,
+        coalesce(d.amount, 0) as today,
+        coalesce(s.topscore, 0) as topscore
+      from users u
+      left join totals t on t.user_id = u.id
+      left join todays d on d.user_id = u.id
+      left join month m on m.user_id = u.id
+      left join topscore s on s.user_id = u.id
+      order by today DESC
+      ` {:id contest-id
+         :year year
+         :month start-of-month
+         :year_day year-day})))
 
 (defn get-chart-data [contest-id &opt year]
   `
@@ -174,6 +187,7 @@
     recording.amount,
     recording.year,
     recording.year_day,
+    recording.created_at,
     (recording.year_day + recording.year) as i
   from recording
     left join user on user.id = recording.user_id

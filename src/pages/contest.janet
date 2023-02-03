@@ -20,14 +20,16 @@
      [:th "Name" ]
      [:th "Today" ]
      [:th "Topscore" ]
-     [:th "This year" ]]]
+     [:th "Month" ] # TODO: name of month?
+     [:th "Year" ]]]
    [:tbody
-    (flip map users (fn [{:id id :name name :total total :today today :topscore topscore }]
+    (flip map users (fn [{:id id :name name :total total :today today :topscore topscore :month month }]
       [:tr
        [:td
         [:a {:href (string "/" (cname contest-name) "/" id) } name ] ]
        [:td today ]
        [:td topscore ]
+       [:td month ]
        [:td total ]]))]])
 
 (defn- new-user-form
