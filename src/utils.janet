@@ -98,3 +98,9 @@
 
 (defn from-cname [name]
   (string/replace-all "-" " " name))
+
+(defn to-beginning-of-month [time]
+  (let [{:month-day md} (os/date time :local)
+        day-in-seconds (* 60 60 24)
+        start-of-month (- time (* day-in-seconds md))]
+    start-of-month))

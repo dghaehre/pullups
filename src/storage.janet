@@ -115,9 +115,8 @@
  - total amount THIS MONTH
  ```
   (let [now (os/time)
-        {:year year :year-day year-day :month-day md} (os/date now :local)
-        day-in-seconds (* 60 60 24)
-        start-of-month (- now (* day-in-seconds md))]
+        {:year year :year-day year-day} (os/date now :local)
+        start-of-month (to-beginning-of-month now)]
     (db/query `
       with users as (
         select * from user
@@ -196,6 +195,30 @@
     and recording.year = :year
     order by recording.created_at DESC` {:id contest-id
                                          :year year}))
+
+(defn get-chart-data-month [contest-id]
+  `
+  Get recordings with user data for current month.
+  `
+  (let [start-of-month (to-beginning-of-month (os/time))]
+    (print "start of month:")
+    (pp start-of-month)
+    (db/query `
+    select
+      user.id as id,
+      user.name,
+      recording.amount,
+      recording.year,
+      recording.year_day,
+      recording.created_at,
+      (recording.year_day + recording.year) as i
+    from recording
+      left join user on user.id = recording.user_id
+      inner join mapping on mapping.user_id = recording.user_id
+      and mapping.contest_id = :id
+      and recording.created_at > :time
+      order by recording.created_at DESC` {:id contest-id
+                                           :time start-of-month})))
 
 (defn get-user [id]
   (def users (get-users id))

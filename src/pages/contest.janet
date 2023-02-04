@@ -77,6 +77,7 @@
   (def contest (st/get-contest name))
   (if (nil? contest)
     (redirect-to :home/index)
-    (->> (get contest :id)
-        (st/get-chart-data)
-        (chart/overview))))
+    (let [id (get contest :id)
+          general-chart-data (st/get-chart-data id)
+          month-chart-data (st/get-chart-data-month id)]
+      (chart/overview general-chart-data month-chart-data))))

@@ -96,19 +96,29 @@ const myChart"(string typ)" = new Chart(
   config"(string typ)"
 );"))])
 
-(defn overview [chart-data]
-  (let [users-with-recs (reduce padd-users @[] chart-data)
-        stats           (rec-stats users-with-recs)
-        labels          (create-labels (get stats :days-of-data))
-        data-agg        (map-indexed (create-dataset stats :aggregate) users-with-recs)
-        data-daily      (map-indexed (create-dataset stats :daily) users-with-recs)]
+(defn overview [general-chart-data month-data]
+  (let [users-with-recs       (reduce padd-users @[] general-chart-data)
+        stats                 (rec-stats users-with-recs)
+        labels                (create-labels (get stats :days-of-data))
+        data-agg              (map-indexed (create-dataset stats :aggregate) users-with-recs)
+        data-daily            (map-indexed (create-dataset stats :daily) users-with-recs)
+
+        # Same stuff for month data
+        users-with-recs-month (reduce padd-users @[] month-data)
+        stats-month           (rec-stats users-with-recs-month)
+        labels-month          (create-labels (get stats-month :days-of-data))
+        data-month            (map-indexed (create-dataset stats-month :aggregate) users-with-recs-month)]
     [:div {:class "big-element"}
+      [:h4 {:style "text-align: right; color: grey;"} "This month"]
+      [:canvas {:id "chart-month"}]
+      [:br]
       [:h4 {:style "text-align: right; color: grey;"} "This year"]
       [:canvas {:id "chart-aggregate"}]
       [:br]
-      [:h4 {:style "text-align: right; color: grey;"} "Daily count"]
+      [:h4 {:style "text-align: right; color: grey;"} "Daily count this year"]
       [:canvas {:id "chart-daily"}]
       (create-chart data-agg labels :aggregate)
+      (create-chart data-month labels-month :month)
       (create-chart data-daily labels :daily)]))
 
 (defn loader [contest-name]
