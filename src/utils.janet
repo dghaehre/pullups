@@ -1,13 +1,5 @@
 (use joy)
 
-(defn valid-contest-name?
-  "Is given name valid?"
-  [name]
-  (let [not-valid-names @["admin" "blog" "about" "terms" "login"]]
-    (and
-      (< 2 (length name))
-      (empty? (filter |(= name $0) not-valid-names)))))
-
 (defn unique-user-ids
   "Take in a list of recordings, and return a list of unique user ids."
   [recordings]

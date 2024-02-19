@@ -117,4 +117,14 @@
        (redirect-to :contest/user {:contest (cname contest-name)
                                    :user-id user-id
                                    :? {:error err}})))))
+
 # This is the http layer.. we need a service layer to more simply test this..
+(deftest: with-db "contest/record" [_]
+  (test (contest/record {:body {:user-id 1
+                                :contest-id 1
+                                :change "today"
+                                :amount "10"
+                                :contest-name "test"}})
+    @{:body " "
+      :headers @{"Location" "/test/1?error=FOREIGN%20KEY%20constraint%20failed"}
+      :status 302}))

@@ -1,6 +1,7 @@
 (use joy)
 (use utils)
 (use ../utils)
+(import ../service/general :as g)
 (import ../storage :as st)
 
 (def- home/header
@@ -45,7 +46,7 @@
   "Check if name is available"
   [req]
   (def name (get-in req [:query-string :name]))
-  (def available (and (valid-contest-name? name) (not (st/contest-exist? name))))
+  (def available (g/available-contest-name? name))
   (text/html (submit (not available))))
 
 (defn home/create-contest
