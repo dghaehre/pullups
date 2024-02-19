@@ -19,7 +19,7 @@
   (let [{:year year :month m :month-day md} (os/date time :local)
         day                                 (+ 1 md)
         empty-arrow [:span {:style "margin-right: 12px; margin-left: 12px;" :class "date-arrow"} "   "]]
-     [:form {:method "post" :action "/record" }
+     [:form {:method "post" :action "/record"}
       [:p
         [:label [:h4 "Total pullups"]]]
       [:p
@@ -41,20 +41,20 @@
                   :hx-target "#record-form"}
            "➡"])]
       [:p
-        [:input {:type "text" :placeholder current-amount :name "amount"} ]]
-      [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
-      [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
-      [:input {:type "hidden" :name "year" :value year } ]
-      [:input {:type "hidden" :name "month-day" :value md } ]
-      [:input {:type "hidden" :name "change" :value change } ]
-      [:input {:type "hidden" :name "user-id" :value user-id } ]
+        [:input {:type "text" :placeholder current-amount :name "amount"}]]
+      [:input {:type "hidden" :name "contest-id" :value (get contest :id)}]
+      [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
+      [:input {:type "hidden" :name "year" :value year}]
+      [:input {:type "hidden" :name "month-day" :value md}]
+      [:input {:type "hidden" :name "change" :value change}]
+      [:input {:type "hidden" :name "user-id" :value user-id}]
       [:p 
-        [:button {:type "submit"} "Update" ]]]))
+        [:button {:type "submit"} "Update"]]]))
 
 (defn- layout
   [user contest err]
   [:main
-   [:h3 (get user :name) ]
+   [:h3 (get user :name)]
    [:hr]
    [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
    (if-not (nil? err) (display-error err))])
@@ -66,10 +66,10 @@
   (def contest-name (get-in req [:body :contest-name]))
   (if (-> name (string/trim) (empty?))
     (redirect-to :contest/index {:contest (cname contest-name)
-                                 :? {:error "empty user name" }})
+                                 :? {:error "empty user name"}})
     (do
       (st/create-user name contest-id)
-      (redirect-to :contest/index {:contest (cname contest-name) }))))
+      (redirect-to :contest/index {:contest (cname contest-name)}))))
 
 # TODO; handle error
 (defn contest/get-record-form [req]
@@ -97,7 +97,7 @@
             (put user :today (st/get-today-amount user-id))
             [ (header contest-name)
               (layout user contest err)
-              (footer req (get contest :id)) ]))))))
+              (footer req (get contest :id))]))))))
 
 (defn contest/record
   [req]
@@ -109,9 +109,9 @@
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
         (pp change)
         (st/insert-recording amount user-id contest-id (time-by-change (keyword change)))
-        (redirect-to :contest/index {:contest (cname contest-name) }))
+        (redirect-to :contest/index {:contest (cname contest-name)}))
 
       ([err fib]
-        (redirect-to :contest/user { :contest (cname contest-name)
-                                    :user-id user-id
-                                    :? {:error err }})))))
+       (redirect-to :contest/user { :contest (cname contest-name)
+                                   :user-id user-id
+                                   :? {:error err}})))))

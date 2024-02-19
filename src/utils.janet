@@ -22,8 +22,8 @@
   [name]
   [:header
     [:a {:href (string "/" name)
-         :style "color: var(--text); text-decoration: none;" }
-      [:h3 {:style "margin: 20px 0px -5px"} name ]]])
+         :style "color: var(--text); text-decoration: none;"}
+      [:h3 {:style "margin: 20px 0px -5px"} name]]])
 
 (defn display-error [err]
   (let [red {:style "color: #E24556"}
@@ -44,22 +44,22 @@
         (display-success success))
       (if-not (nil? err)
         (display-error err))
-    [:p {:style "text-align: center" }
-      [:span "Made by " ]
-      [:a {:href "https://dghaehre.com"} "Daniel"]
-      [:span " using " ]
-      [:a {:href "https://janet-lang.org"} "Janet"]]
-    [:p
-      [:form {:method "post" :action "/feedback"}
-      [:p "For feedback or requests:" ]
-      (if-not (nil? contest-id)
-        [:input {:type "hidden"
-                 :name "contest"
-                 :value contest-id}])
-      [:p [:input {:type "text"
-                   :name "message"
-                   :placeholder ""}]]
-      [:button {:style "margin: 0px; padding: 8px;"} "Send feedback"]]]]))
+     [:p {:style "text-align: center"}
+       [:span "Made by "]
+       [:a {:href "https://dghaehre.com"} "Daniel"]
+       [:span " using "]
+       [:a {:href "https://janet-lang.org"} "Janet"]]
+     [:p
+       [:form {:method "post" :action "/feedback"}
+        [:p "For feedback or requests:"]
+        (if-not (nil? contest-id)
+          [:input {:type "hidden"
+                   :name "contest"
+                   :value contest-id}])
+        [:p [:input {:type "text"
+                     :name "message"
+                     :placeholder ""}]]
+        [:button {:style "margin: 0px; padding: 8px;"} "Send feedback"]]]]))
 
 (defn padd-users [users rec]
   ```
@@ -72,9 +72,9 @@
   (loop [u :in users :when (= (get u :id) (get rec :id))]
     (do
       (put u :recs (array/concat (get u :recs) @{:amount (get rec :amount)
-                                              :year (get rec :year)
-                                              :created-at (get rec :created-at)
-                                              :year-day (get rec :year-day)}))
+                                                 :year (get rec :year)
+                                                 :created-at (get rec :created-at)
+                                                 :year-day (get rec :year-day)}))
       (set exist true)))
   (if-not exist
     (array/concat users @{:id (get rec :id)

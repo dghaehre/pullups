@@ -5,8 +5,8 @@
   "Check db if name already exist"
   [name]
   (let [rows (db/query `
-    select * from contest
-    where upper(name) = upper(:name)` {:name (from-cname name)})]
+              select * from contest
+              where upper(name) = upper(:name)` {:name (from-cname name)})]
     (not (nil? (get rows 0)))))
 
 (defn create-contest
@@ -17,8 +17,8 @@
   "Get contest. Returns nil if not found."
   [name]
   (let [rows (db/query `
-    select * from contest
-    where upper(name) = upper(:name)` {:name (from-cname name)})]
+              select * from contest
+              where upper(name) = upper(:name)` {:name (from-cname name)})]
     (get rows 0)))
 
 (defn get-contest-from-id [id]
@@ -45,14 +45,14 @@
   ```
   (default time (os/time))
   (let [{:year-day year-day :year year } (os/date time :local)]
-        (db/insert {:db/table :recording
-                    :amount amount
-                    :user_id user-id
-                    :year year
-                    :year_day year-day
-                    } :on-conflict [:user_id :year :year_day]
-                      :do :update :set { :amount amount }
-                   )))
+       (db/insert {:db/table :recording
+                   :amount amount
+                   :user_id user-id
+                   :year year
+                   :year_day year-day}
+                  :on-conflict [:user_id :year :year_day]
+                     :do :update :set { :amount amount})))
+                   
 
 # TODO: make it one transaction
 (defn create-user
@@ -69,7 +69,7 @@
   Get all recordings from a contest
   ```
   (db/from :recording
-           :where {:contest-id contest-id }))
+           :where {:contest-id contest-id}))
 
 (defn get-users
   [ids]
@@ -78,19 +78,19 @@
 
 (defn get-user-from-contest [contest-id user-id]
   (let [rows (db/query `
-  select u.id, u.name from user u
-  inner join mapping m
-  on u.id = m.user_id
-  and u.id = :userid
-  and m.contest_id = :contestid` {:contestid contest-id :userid user-id})]
+              select u.id, u.name from user u
+              inner join mapping m
+              on u.id = m.user_id
+              and u.id = :userid
+              and m.contest_id = :contestid` {:contestid contest-id :userid user-id})]
     (get rows 0 nil)))
 
 (defn get-users-from-contest [contest-id]
   (db/query `
-  select u.id, u.name from user u
-  inner join mapping m
-  on u.id = m.user_id
-  and m.contest_id = :contestid` {:contestid contest-id}))
+   select u.id, u.name from user u
+   inner join mapping m
+   on u.id = m.user_id
+   and m.contest_id = :contestid` {:contestid contest-id}))
 
 # TODO: remove
 (defn get-today-amount [user-id &opt time]
@@ -119,42 +119,42 @@
         start-of-month (to-beginning-of-month now)]
     (db/query `
       with users as (
-        select * from user
-        inner join mapping on mapping.user_id = user.id
-        and mapping.contest_id = :id
-      ), recordings as (
-        select * from recording
-        inner join users on users.id = recording.user_id
-      ), totals as (
-        select
-          SUM(amount) as total,
-          user_id
-        from recordings
-        where year = :year
-        group by user_id
-      ), todays as (
-        select
-          amount,
-          user_id
-        from recordings
-        where year = :year
-        and year_day = :year_day
-        group by user_id
-      ), month as (
-        select
-          SUM(amount) as total,
-          user_id
-        from recordings
-        where created_at > :month
-        group by user_id
-      ), topscore as (
-        select
-          MAX(amount) as topscore,
-          user_id
-        from recordings
-        where year = :year
-        group by user_id
-      )
+                     select * from user
+                     inner join mapping on mapping.user_id = user.id
+                     and mapping.contest_id = :id)
+      , recordings as (
+                       select * from recording
+                       inner join users on users.id = recording.user_id)
+      , totals as (
+                   select
+                   SUM(amount) as total,
+                   user_id
+                   from recordings
+                   where year = :year
+                   group by user_id)
+      , todays as (
+                   select
+                   amount,
+                   user_id
+                   from recordings
+                   where year = :year
+                   and year_day = :year_day
+                   group by user_id)
+      , month as (
+                  select
+                  SUM(amount) as total,
+                  user_id
+                  from recordings
+                  where created_at > :month
+                  group by user_id)
+      , topscore as (
+                     select
+                     MAX(amount) as topscore,
+                     user_id
+                     from recordings
+                     where year = :year
+                     group by user_id)
+      
       select
         u.id,
         u.name,
@@ -180,7 +180,7 @@
   `
   (default year (get (os/date (os/time) :local) :year))
   (db/query `
-  select
+   select
     user.id as id,
     user.name,
     recording.amount,
@@ -188,7 +188,7 @@
     recording.year_day,
     recording.created_at,
     (recording.year_day + recording.year) as i
-  from recording
+   from recording
     left join user on user.id = recording.user_id
     inner join mapping on mapping.user_id = recording.user_id
     and mapping.contest_id = :id
@@ -204,7 +204,7 @@
     (print "start of month:")
     (pp start-of-month)
     (db/query `
-    select
+     select
       user.id as id,
       user.name,
       recording.amount,
@@ -212,7 +212,7 @@
       recording.year_day,
       recording.created_at,
       (recording.year_day + recording.year) as i
-    from recording
+     from recording
       left join user on user.id = recording.user_id
       inner join mapping on mapping.user_id = recording.user_id
       and mapping.contest_id = :id

@@ -10,37 +10,37 @@
   [users]
   (defn list [{:name name}]
     [:li name])
-  [:ul (map list users) ])
+  [:ul (map list users)])
 
 (defn- overview
   [contest-name users]
-  [:table {:style "display: inline-table; margin: 0;" :class "contest-table" }
+  [:table {:style "display: inline-table; margin: 0;" :class "contest-table"}
    [:thead
     [:tr
-     [:th "Name" ]
-     [:th "Today" ]
-     [:th "Topscore" ]
-     [:th "Month" ] # TODO: name of month?
-     [:th "Year" ]]]
+     [:th "Name"]
+     [:th "Today"]
+     [:th "Topscore"]
+     [:th "Month"] # TODO: name of month?
+     [:th "Year"]]]
    [:tbody
-    (flip map users (fn [{:id id :name name :total total :today today :topscore topscore :month month }]
-      [:tr
-       [:td
-        [:a {:href (string "/" (cname contest-name) "/" id) } name ] ]
-       [:td today ]
-       [:td topscore ]
-       [:td month ]
-       [:td total ]]))]])
+    (flip map users (fn [{:id id :name name :total total :today today :topscore topscore :month month}]
+                     [:tr
+                      [:td
+                       [:a {:href (string "/" (cname contest-name) "/" id) } name]]
+                      [:td today]
+                      [:td topscore]
+                      [:td month]
+                      [:td total]]))]])
 
 (defn- new-user-form
   [contest]
-  [:details {:class "new-user-form" }
-   [:summary "Add user" ]
-   [:form {:method "post" :action "/create-user" }
-    [:input {:type "text" :placeholder "Name" :name "name"} ]
-    [:input {:type "hidden" :name "contest-id" :value (get contest :id) } ]
-    [:input {:type "hidden" :name "contest-name" :value (get contest :name) } ]
-    [:button {:type "submit" :style "width: 100%"} "Add user" ]]])
+  [:details {:class "new-user-form"}
+   [:summary "Add user"]
+   [:form {:method "post" :action "/create-user"}
+    [:input {:type "text" :placeholder "Name" :name "name"}]
+    [:input {:type "hidden" :name "contest-id" :value (get contest :id)}]
+    [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
+    [:button {:type "submit" :style "width: 100%"} "Add user"]]])
 
 (defn- main/content [contest err]
   (let [id          (get contest :id)
@@ -66,8 +66,8 @@
       (redirect-to :home/index)
       [[:script {:src "/xxx.chart.js"}]
        (header (get contest :name))
-        (main/content contest err)
-        (footer req (get contest :id)) ])))
+       (main/content contest err)
+       (footer req (get contest :id))])))
 
 (defn contest/get-chart [req]
   ```
