@@ -2,7 +2,7 @@
 (use utils)
 (use ../utils)
 (import ../service/general :as g)
-(import ../storage :as st)
+(import ../service/contest :as c)
 
 (def- home/header
   [:header
@@ -55,7 +55,7 @@
   (def name (get-in req [:body :name]))
   (try
     (do
-      (with-err "could not create contest" (st/create-contest name))
+      (with-err "could not create contest" (c/create-contest name))
       (redirect-to :contest/index {:contest (cname name)}))
     ([err _] (redirect-to :home/index { :? {:error err}}))))
 

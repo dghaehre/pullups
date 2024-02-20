@@ -1,9 +1,7 @@
 (use joy)
 (use utils)
-(use judge)
 (use ../utils)
 (import ../storage :as st)
-(use ../test/setup)
 
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
@@ -117,4 +115,3 @@
        (redirect-to :contest/user {:contest (cname contest-name)
                                    :user-id user-id
                                    :? {:error err}})))))
-# This is the http layer.. we need a service layer to more simply test this..
