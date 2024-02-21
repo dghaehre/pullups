@@ -2,6 +2,7 @@
 (use utils)
 (use ../utils)
 (import ../storage :as st)
+(import ../service/user :as user)
 
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
@@ -99,6 +100,7 @@
               (layout user contest err)
               (footer req (get contest :id))]))))))
 
+# TODO: add some auth here! It might be a private user
 (defn contest/record
   [req]
   (let [user-id       (get-in req [:body :user-id])
@@ -107,11 +109,13 @@
         contest-name  (get-in req [:body :contest-name])]
     (try
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
-        (pp change)
-        (st/insert-recording amount user-id contest-id (time-by-change (keyword change)))
+        (user/record user-id contest-id (time-by-change (keyword change)) contest-name amount)
         (redirect-to :contest/index {:contest (cname contest-name)}))
 
       ([err fib]
        (redirect-to :contest/user {:contest (cname contest-name)
                                    :user-id user-id
                                    :? {:error err}})))))
+
+(comment
+  (time-by-change :someth))

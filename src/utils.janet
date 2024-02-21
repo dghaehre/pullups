@@ -96,3 +96,14 @@
         day-in-seconds (* 60 60 24)
         start-of-month (- time (* day-in-seconds md))]
     start-of-month))
+
+(defn htmx-redirect [path & otherstuff]
+  "Adds a HX-Redirect header for it to work with client side redirect (htmx)"
+  (let [location  (url-for path ;otherstuff)]
+    @{:status 200
+      :body " "
+      :headers @{"Location" location
+                 "HX-Redirect" location}}))
+
+(defmacro silent [body]
+  ~(try ,body ([_] nil)))

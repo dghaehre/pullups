@@ -1,4 +1,5 @@
 (use joy)
+(use ./pages/session)
 (use ./pages/home)
 (use ./pages/contest)
 (use ./pages/user)
@@ -24,10 +25,8 @@
 (def app (-> (handler)
              (layout app-layout)
              (with-session)
-             (extra-methods)
              (query-string)
              (body-parser)
-             (json-body-parser)
              (server-error)
              (x-headers)
              (static-files)
@@ -37,7 +36,10 @@
 # Server
 (defn main [& args]
   (let [port (get args 1 (env :PORT))
-        host (get args 2 "localhost")]
+        host (get args 2 "localhost")
+        encryption-key (env :encryption-key)]
+    (if (nil? encryption-key) (error "ENCRYPTION-KEY environment variable is not set")
+      (setdyn :encryption-key encryption-key))
     (print (string "serving at " host ":" port))
     (db/connect (env :database-url))
     (server app port host)

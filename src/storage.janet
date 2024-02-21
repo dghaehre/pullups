@@ -226,6 +226,34 @@
     nil
     (get users 0)))
 
+(defn is-private? [id]
+  (def user (get-user id))
+  (if (nil? user)
+    (error (string "No user found with id: " id)))
+  (and (not (nil? (get user :username)))
+       (not (nil? (get user :password)))))
+  
+(defn make-private [id username password]
+  (db/update :user {:id id} {:username username :password password}))
+
+(defn user-from-username [username]
+  (let [users (db/from :user :where {:username username})]
+    (if (empty? users)
+      (error "No user found with that username")
+      (get users 0))))
+
+(defn insert-session [user-id token]
+  (assert (number? user-id))
+  (assert (string? token))
+  (db/insert {:db/table :session
+              :user_id user-id
+              :token token}
+            :on-conflict [:user_id]
+               :do :update :set {:token token}))
+
+(defn delete-session [user-id token]
+  (db/delete :session {:user_id user-id :token token}))
+
 # Seems like multiple joins are not supported by db/from
 (defn- get-all
   "Just a helper function used in development"
