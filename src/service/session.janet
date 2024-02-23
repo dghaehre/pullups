@@ -20,4 +20,30 @@
   res)
 
 (defn logout [user-id token]
-  (st/delete-session user-id token))
+  (st/delete-session token user-id))
+
+(defmacro defn-auth
+  "Define a function that requires authentication.
+
+  Usage:
+  (defn-auth some-handler [req user-id]
+    body)"
+  [name params & body]
+  ~(defn ,name [req]
+    (let [token         (get-in req [:session :token])
+          user-id       (get-in req [:session :user-id])
+          valid         (,st/session-valid? token user-id)]
+       (if (not valid)
+         (redirect-to :get/login) # ....
+         ((fn ,params (do ,;body)) req user-id)))))
+
+(comment
+
+  # Goal
+  (defn-auth testing [req user-id]
+    [:h1 "yessda"])
+
+  (testing {:session {:token "test"}})
+
+  (macex1 '(defn-auth testing [req user-id]
+            [:h1 "yessda"])))

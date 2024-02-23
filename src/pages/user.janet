@@ -3,7 +3,9 @@
 (use ../utils)
 (import ../storage :as st)
 (import ../service/user :as user)
+(import ../service/session :as s)
 
+(route :get "/user/:user-id" :private/user)
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
 (route :post "/create-user" :contest/create-user)
@@ -59,6 +61,15 @@
    [:hr]
    [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
    (if-not (nil? err) (display-error err))])
+
+(defn- private-form [contest]
+   [:h4 "Do you want to claim this user?"]
+   [:form {:method "post" :action "/make-private"}
+    [:input {:type "text" :name "username" :placeholder "username"}]
+    [:input {:type "password" :name "password" :placeholder "password"}]
+    [:input {:type "hidden" :name "contest-id" :value (get contest :id)}]
+    [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
+    [:button {:type "submit"} "Claim"]])
 
 (defn contest/create-user
   [req]
@@ -116,6 +127,12 @@
        (redirect-to :contest/user {:contest (cname contest-name)
                                    :user-id user-id
                                    :? {:error err}})))))
+
+(s/defn-auth private/user [req user-id]
+  [:main
+   [:h1 "Private user"]
+   [:p "This is a private user page"]
+   [:p "You are " user-id]])
 
 (comment
   (time-by-change :someth))

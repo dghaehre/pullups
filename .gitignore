@@ -2,3 +2,4 @@ build
 /.env
 *.sqlite3
 *.db
+testdb

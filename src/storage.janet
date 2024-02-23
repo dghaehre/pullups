@@ -201,8 +201,6 @@
   Get recordings with user data for current month.
   `
   (let [start-of-month (to-beginning-of-month (os/time))]
-    (print "start of month:")
-    (pp start-of-month)
     (db/query `
      select
       user.id as id,
@@ -251,8 +249,13 @@
             :on-conflict [:user_id]
                :do :update :set {:token token}))
 
-(defn delete-session [user-id token]
+(defn delete-session [token user-id]
   (db/delete :session {:user_id user-id :token token}))
+
+(defn session-valid? [token user-id]
+  (let [row (-> (db/from :session :where {:user_id user-id :token token})
+                (get 0))]
+    (not (nil? row))))
 
 # Seems like multiple joins are not supported by db/from
 (defn- get-all

@@ -15,8 +15,8 @@
   (try
     (let [username (get-in req [:body :username])
           password (get-in req [:body :password])
-          {:token token :user-id user-id (s/login username password)}]
-      (-> (htmx-redirect :get/login) # TODO: redirect to user page
+          {:token token :user-id user-id} (s/login username password)]
+      (-> (htmx-redirect :private/user {:user-id user-id})
           (s/add-session token user-id)))
     ([err _] (redirect-error err))))
                        
