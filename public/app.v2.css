@@ -2,7 +2,9 @@
 :root {
   --bg: #39424E;
   --text: white;
+  --accent-text: #88C0D0;
   --accent-bg: #22272e;
+  --private-bg: #B48EAD;
 }
 
 .date-arrow {
@@ -16,6 +18,14 @@
 
 .chart-loader {
   height: 720px;
+}
+
+.header-private {
+	background-color: var(--private-bg);
+}
+
+.header-private .logout {
+	float: right;
 }
 
 @media only screen and (min-width: 1200px) {

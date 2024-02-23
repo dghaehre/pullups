@@ -16,7 +16,7 @@
     (let [username (get-in req [:body :username])
           password (get-in req [:body :password])
           {:token token :user-id user-id} (s/login username password)]
-      (-> (htmx-redirect :private/user {:user-id user-id})
+      (-> (redirect-to :private/user {:user-id user-id})
           (s/add-session token user-id)))
     ([err _] (redirect-error err))))
                        
@@ -35,5 +35,5 @@
   (let [token (get-in req [:session :token])
         user-id (get-in req [:session :user-id])]
     (silent (s/logout user-id token))
-    (-> (redirect-to :get/index)
-      (put :session {}))))
+    (-> (redirect-to :home/index)
+        (put :session {}))))

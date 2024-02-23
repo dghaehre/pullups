@@ -17,6 +17,15 @@
          :style "color: var(--text); text-decoration: none;"}
       [:h3 {:style "margin: 20px 0px -5px"} name]]])
 
+(defn header-private
+  [name]
+  [:header {:class "header-private"}
+    [:a {:href (string "/" name)
+         :style "color: var(--text); text-decoration: none;"}
+      [:h3 {:style "margin: 20px 0px -5px"} name]]
+    [:a {:class "logout"
+         :href "/logout"} "logout"]])
+
 (defn display-error [err]
   (let [red {:style "color: #E24556"}
         grey {:style "color: #DDD9D4"}]

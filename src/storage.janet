@@ -78,7 +78,7 @@
 
 (defn get-user-from-contest [contest-id user-id]
   (let [rows (db/query `
-              select u.id, u.name from user u
+              select u.id, u.name, u.username, u.password from user u
               inner join mapping m
               on u.id = m.user_id
               and u.id = :userid

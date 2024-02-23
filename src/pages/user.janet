@@ -5,6 +5,9 @@
 (import ../service/user :as user)
 (import ../service/session :as s)
 
+(route :post "/take-ownership" :post/take-ownership)
+(route :get "/take-ownership/:user-id" :get/take-ownership)
+
 (route :get "/user/:user-id" :private/user)
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
@@ -56,19 +59,28 @@
 
 (defn- layout
   [user contest err]
-  [:main
-   [:h3 (get user :name)]
-   [:hr]
-   [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
-   (if-not (nil? err) (display-error err))])
+  (let [public-user (and (nil? (user :username)) (nil? (user :password)))]
+    [:main
+     [:h3 (get user :name)]
+     (when (not public-user)
+      [:small {:style "color: var(--accent-text)"}
+       [:a {:href "/login"} "(private)"]])
+     [:hr]
+     [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
+     (if-not (nil? err) (display-error err))
+     [:br]
+     (when public-user
+      [:p "This user is not owned"
+        [:br]
+        [:a {:href (string "/take-ownership/" (get user :id))} "Take ownership"]])]))
 
-(defn- private-form [contest]
+(defn- private-form [user]
    [:h4 "Do you want to claim this user?"]
-   [:form {:method "post" :action "/make-private"}
+   [:form {:method "post" :action "/take-ownership"}
     [:input {:type "text" :name "username" :placeholder "username"}]
     [:input {:type "password" :name "password" :placeholder "password"}]
-    [:input {:type "hidden" :name "contest-id" :value (get contest :id)}]
-    [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
+    [:input {:type "hidden" :name "user-id" :value (get user :id)}]
+    [:br]
     [:button {:type "submit"} "Claim"]])
 
 (defn contest/create-user
@@ -128,11 +140,36 @@
                                    :user-id user-id
                                    :? {:error err}})))))
 
+(defn get/take-ownership [req]
+  (let [user-id (get-in req [:params :user-id])
+        user (st/get-user user-id)
+        is-private (or (not (nil? (user :username))) (not (nil? (user :password))))]
+    (when is-private # TODO: better way of handling this case
+      (error "Cannot take ownership of a private user"))
+    [ (header "user name")
+      [:main
+        [:h3 "Taking ownership of " (user :name)]
+        [:p "By providing a username and password to an existing user, you can claim ownership of that user. This means that only you can update the user's information and record pullups for the user."]
+        [:p "You will also be able to use the same user for multiple contests."]
+        [:br]
+        (private-form {:id user-id})]]))
+
+(defn post/take-ownership [req]
+  (let [user-id (get-in req [:body :user-id])
+        password (get-in req [:body :password])
+        username (get-in req [:body :username])]
+    (user/make-private user-id username password)
+    (redirect-to :get/login)))
+
 (s/defn-auth private/user [req user-id]
-  [:main
-   [:h1 "Private user"]
-   [:p "This is a private user page"]
-   [:p "You are " user-id]])
+  (let [user (st/get-user user-id)]
+    [ (header-private (user :name))
+      [:main
+       [:p "This is a private user page"]
+       [:p "Your user-id: " user-id]
+       [:p "Your contests:"]
+       [:p "Record pullups (for alle coontests)"]
+       [:p "Change name and password"]]]))
 
 (comment
   (time-by-change :someth))

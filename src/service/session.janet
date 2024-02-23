@@ -32,9 +32,9 @@
   ~(defn ,name [req]
     (let [token         (get-in req [:session :token])
           user-id       (get-in req [:session :user-id])
-          valid         (,st/session-valid? token user-id)]
-       (if (not valid)
-         (redirect-to :get/login) # ....
+          [success valid]         (protect (,st/session-valid? token user-id))]
+       (if (or (not success) (not valid))
+         (redirect-to :get/login)
          ((fn ,params (do ,;body)) req user-id)))))
 
 (comment
