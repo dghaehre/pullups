@@ -10,21 +10,25 @@
       list))
   (reduce f @[] recordings))
 
-(defn header
-  [name]
-  [:header
-    [:a {:href (string "/" name)
-         :style "color: var(--text); text-decoration: none;"}
-      [:h3 {:style "margin: 20px 0px -5px"} name]]])
-
 (defn header-private
   [name]
-  [:header {:class "header-private"}
-    [:a {:href (string "/" name)
-         :style "color: var(--text); text-decoration: none;"}
-      [:h3 {:style "margin: 20px 0px -5px"} name]]
-    [:a {:class "logout"
-         :href "/logout"} "logout"]])
+  [:header
+    [:div {:style "display: flex; justify-content: space-around;"}
+      [:a {:style "width: 30px;"}]
+      [:a {:href (string "/" name)
+           :style "color: var(--text); text-decoration: none;"}
+        [:h3 {:style "margin: 20px 0px -5px"} name]]
+      [:a {:class "logout" :style "width: 30px; padding-top: 20px;"
+           :href "/logout"} "logout"]]])
+
+(defn header
+  [name &opt logged-in?]
+  (if logged-in?
+    (header-private name)
+    [:header
+      [:a {:href (string "/" name)
+           :style "color: var(--text); text-decoration: none;"}
+        [:h3 {:style "margin: 20px 0px -5px"} name]]]))
 
 (defn display-error [err]
   (let [red {:style "color: #E24556"}

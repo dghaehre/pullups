@@ -58,21 +58,47 @@
         [:button {:type "submit"} "Update"]]]))
 
 (defn- layout
-  [user contest err]
-  (let [public-user (and (nil? (user :username)) (nil? (user :password)))]
+  [user contest logged-in-userid? err]
+  (let [public-user? (and (nil? (user :username)) (nil? (user :password)))
+        logged-in-user?           (and (not (nil? logged-in-userid?)) (= logged-in-userid? (user :id)))
+        logged-in-different-user? (and (not (nil? logged-in-userid?)) (not logged-in-user?))
+        private-no-access?        (and (not public-user?) (not logged-in-user?))]
     [:main
-     [:h3 (get user :name)]
-     (when (not public-user)
-      [:small {:style "color: var(--accent-text)"}
-       [:a {:href "/login"} "(private)"]])
+     (if logged-in-user?
+       [:h3 [:a {:href (string "/user/" (user :id))} (get user :name)]]
+       [:h3 (get user :name)])
      [:hr]
-     [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
-     (if-not (nil? err) (display-error err))
-     [:br]
-     (when public-user
-      [:p "This user is not owned"
-        [:br]
-        [:a {:href (string "/take-ownership/" (get user :id))} "Take ownership"]])]))
+
+     (cond
+       (and public-user? logged-in-different-user?)
+       [:div
+         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
+         [:p "You are logged in as a different user. Since this is a public user, you can still record pullups."]]
+
+       (and (not public-user?) logged-in-different-user?)
+       [:div
+           [:p "This user is private"]
+           [:p "You do not have permission to record pullups for this user."]]
+
+       (and public-user? (not logged-in-user?))
+       [:div
+         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
+         [:p "This user is not owned"
+            [:br]
+            [:a {:href (string "/take-ownership/" (get user :id))} "Take ownership"]]]
+
+       (and (not public-user?) (not logged-in-user?))
+       [:div
+           [:p "This user is private"]
+           [:p "You do not have permission to record pullups for this user."]
+           [:a {:href (string "/login")} "Maybe you need to log in?"]]
+
+       logged-in-user?
+       [:div
+         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]]
+
+       [:div # Ups, this should never happen! But I have this as a fallback
+         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]])]))
 
 (defn- private-form [user]
    [:h4 "Do you want to claim this user?"]
@@ -111,7 +137,8 @@
   (let [err           (get-in req [:query-string :error])
         contest-name  (get-in req [:params :contest])
         user-id       (get-in req [:params :user-id])
-        contest       (st/get-contest contest-name)]
+        contest       (st/get-contest contest-name)
+        logged-in-userid?    (s/user-id-from-session req)]
     (if (nil? contest)
       (redirect-to :home/index)
       (let [user (st/get-user-from-contest (get contest :id) user-id)]
@@ -119,8 +146,8 @@
           (redirect-to :contest/index {:contest (cname contest-name)})
           (do
             (put user :today (st/get-today-amount user-id))
-            [ (header contest-name)
-              (layout user contest err)
+            [ (header contest-name logged-in-userid?)
+              (layout user contest logged-in-userid? err)
               (footer req (get contest :id))]))))))
 
 # TODO: add some auth here! It might be a private user

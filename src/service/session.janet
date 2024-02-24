@@ -33,9 +33,18 @@
     (let [token         (get-in req [:session :token])
           user-id       (get-in req [:session :user-id])
           [success valid]         (protect (,st/session-valid? token user-id))]
-       (if (or (not success) (not valid))
-         (redirect-to :get/login)
-         ((fn ,params (do ,;body)) req user-id)))))
+       (if (and success valid)
+         ((fn ,params (do ,;body)) req user-id)
+         (redirect-to :get/login)))))
+
+(defn user-id-from-session [req]
+  "Get the user-id from the session, or nil if the session is invalid."
+  (let [token         (get-in req [:session :token])
+        user-id       (get-in req [:session :user-id])
+        [success valid]         (protect (st/session-valid? token user-id))]
+    (if (and success valid)
+      user-id
+      nil)))
 
 (comment
 

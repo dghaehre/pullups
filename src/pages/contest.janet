@@ -2,6 +2,7 @@
 (use utils)
 (use ../utils)
 (import ../storage :as st)
+(import ../service/session :as s)
 (import ../chart :as chart)
 
 # Views
@@ -59,13 +60,14 @@
 
 (defn contest/index
   [req]
-  (let [name        (get-in req [:params :contest])
-        err         (get-in req [:query-string :error])
-        contest     (st/get-contest name)]
+  (let [name               (get-in req [:params :contest])
+        err                (get-in req [:query-string :error])
+        contest            (st/get-contest name)
+        logged-in-userid?  (s/user-id-from-session req)]
     (if (nil? contest)
       (redirect-to :home/index)
       [[:script {:src "/xxx.chart.js"}]
-       (header (get contest :name))
+       (header (get contest :name) logged-in-userid?)
        (main/content contest err)
        (footer req (get contest :id))])))
 
