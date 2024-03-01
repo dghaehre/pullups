@@ -29,6 +29,13 @@
   []
   (db/from :contest))
 
+(defn get-contests-by-user [user-id]
+  "Get all contests for a user"
+  (db/query `
+   select c.id, c.name from contest c
+   inner join mapping m on m.contest_id = c.id
+   where m.user_id = :userid` {:userid user-id}))
+
 (defn insert-feedback [message &opt contest-id]
   (db/insert {:db/table :feedback
               :message message
@@ -37,7 +44,7 @@
 (defn get-feedbacks []
   (db/from :feedback))
 
-(defn insert-recording [amount user-id contest-id &opt time]
+(defn insert-recording [amount user-id &opt time]
   ```
   Inserting of recording.
   If we already find a similar recording for the same day,

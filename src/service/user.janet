@@ -21,10 +21,10 @@
   (def password (p/secure-password password))
   (st/make-private id username password))
 
-(defn record [user-id contest-id change-time contest-name amount &opt req]
+(defn record [user-id change-time contest-name amount &opt req]
   (if (st/is-private? user-id)
     (if (nil? (s/user-id-from-session req))
       (error "not allowed: user is private")
-      (st/insert-recording amount user-id contest-id change-time))
-    (st/insert-recording amount user-id contest-id change-time)))
+      (st/insert-recording amount user-id change-time))
+    (st/insert-recording amount user-id change-time)))
 

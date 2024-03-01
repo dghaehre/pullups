@@ -163,7 +163,7 @@
         contest-name  (get-in req [:body :contest-name])]
     (try
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
-        (user/record user-id contest-id (time-by-change (keyword change)) contest-name amount req)
+        (user/record user-id (time-by-change (keyword change)) contest-name amount req)
         (redirect-to :contest/index {:contest (cname contest-name)}))
 
       ([err fib]
@@ -193,14 +193,22 @@
     (redirect-to :get/login)))
 
 (s/defn-auth private/user [req user-id]
-  (let [user (st/get-user user-id)]
+  (let [user (st/get-user user-id)
+        contests (st/get-contests-by-user user-id)]
     [ (header-private (user :name))
       [:main
-       [:p "This is a private user page"]
-       [:p "Your user-id: " user-id]
-       [:p "Your contests:"]
-       [:p "Record pullups (for alle coontests)"]
-       [:p "Change name and password"]]]))
+       [:p "This is your private user page"]
+       [:table {:style "display: inline-table; margin: 0;" :class "contest-table"}
+        [:thead
+         [:tr
+          [:th "Your contests"]
+          [:th "Ranking"]]]
+        [:tbody
+          (seq [{:name name} :in contests]
+            [:tr
+             [:td [:a {:href (string "/" name)} name]]
+             [:td "TODO"]])]]]]))
+           # TODO: allow for changing name and password
 
 (comment
   (time-by-change :someth))
