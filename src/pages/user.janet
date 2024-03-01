@@ -59,6 +59,7 @@
 
 (defn- layout
   [user contest logged-in-userid? err]
+  (print err)
   (let [public-user? (and (nil? (user :username)) (nil? (user :password)))
         logged-in-user?           (and (not (nil? logged-in-userid?)) (= logged-in-userid? (user :id)))
         logged-in-different-user? (and (not (nil? logged-in-userid?)) (not logged-in-user?))
@@ -68,6 +69,9 @@
        [:h3 [:a {:href (string "/user/" (user :id))} (get user :name)]]
        [:h3 (get user :name)])
      [:hr]
+
+     (when (not (nil? err))
+       [:p {:style "color: red;"} err])
 
      (cond
        (and public-user? logged-in-different-user?)
@@ -99,6 +103,7 @@
 
        [:div # Ups, this should never happen! But I have this as a fallback
          [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]])]))
+  
 
 (defn- private-form [user]
    [:h4 "Do you want to claim this user?"]
@@ -150,7 +155,6 @@
               (layout user contest logged-in-userid? err)
               (footer req (get contest :id))]))))))
 
-# TODO: add some auth here! It might be a private user
 (defn contest/record
   [req]
   (let [user-id       (get-in req [:body :user-id])
@@ -159,7 +163,7 @@
         contest-name  (get-in req [:body :contest-name])]
     (try
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
-        (user/record user-id contest-id (time-by-change (keyword change)) contest-name amount)
+        (user/record user-id contest-id (time-by-change (keyword change)) contest-name amount req)
         (redirect-to :contest/index {:contest (cname contest-name)}))
 
       ([err fib]

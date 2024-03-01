@@ -1,6 +1,7 @@
 (use joy)
 (use ../utils)
 (import ../storage :as st)
+(import ./session :as s)
 (import ./password :as p)
 
 (defn validate-username [username]
@@ -20,8 +21,10 @@
   (def password (p/secure-password password))
   (st/make-private id username password))
 
-(defn record [user-id contest-id change-time contest-name amount &opt auth]
+(defn record [user-id contest-id change-time contest-name amount &opt req]
   (if (st/is-private? user-id)
-    (error "User is private"))
-  (st/insert-recording amount user-id contest-id change-time))
+    (if (nil? (s/user-id-from-session req))
+      (error "not allowed: user is private")
+      (st/insert-recording amount user-id contest-id change-time))
+    (st/insert-recording amount user-id contest-id change-time)))
 

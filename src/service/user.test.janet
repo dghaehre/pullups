@@ -3,6 +3,7 @@
 (use ./user)
 (use ../test/setup)
 (use ../utils)
+(import ./session :as session)
 (import ../storage :as st)
 
 
@@ -31,7 +32,15 @@
 
   # Make user private
   (make-private 1 "username" "password")
-  (test (protect (record 1 1 (time-by-change nil) "test-contest" 200) :amount) [false "User is private"]))
+  (test (protect (record 1 1 (time-by-change nil) "test-contest" 200)) [false "not allowed: user is private"])
 
-  # TODO: provide auth
+  # with wrong auth
+  (def wrong-auth {:session {:token 1 :user-id 1}})
+  (test (protect (record 1 1 (time-by-change nil) "test-contest" 200 wrong-auth)) [false "not allowed: user is private"])
+
+  (def login-res (session/login "username" "password"))
+  (def auth {:session login-res})
+  (test (-> (record 1 1 (time-by-change nil) "test-contest" 200 auth)
+            (get :amount))
+    200))
 
