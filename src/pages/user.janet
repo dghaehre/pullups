@@ -202,12 +202,26 @@
         [:thead
          [:tr
           [:th "Your contests"]
-          [:th "Ranking"]]]
+          [:th "Todays ranking"]]]
         [:tbody
-          (seq [{:name name} :in contests]
-            [:tr
-             [:td [:a {:href (string "/" name)} name]]
-             [:td "TODO"]])]]]]))
+          (seq [{:name name :id id} :in contests]
+            (let [{:rank rank :participants p :no-recordings nr} (st/get-todays-ranking id user-id)
+                  rank-text (cond
+                              nr
+                              "No recordings"
+
+                              (and (> p 2)
+                                   (= rank p))
+                              "Last place"
+
+                              (and (> p 2)
+                                   (= rank 1))
+                              "First place"
+                              
+                              (string rank " of " p))]
+              [:tr
+               [:td [:a {:href (string "/" name)} name]]
+               [:td rank-text]]))]]]]))
            # TODO: allow for changing name and password
 
 (comment

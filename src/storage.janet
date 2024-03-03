@@ -1,4 +1,5 @@
 (use joy)
+(use utils)
 (use ./utils)
 
 (defn contest-exist?
@@ -113,6 +114,54 @@
                (get :amount))
           0))
     ([err _] (do (pp err) 0))))
+
+(defn get-todays-ranking [contest-id user-id]
+  (let [now (os/time)
+        {:year year :year-day year-day} (os/date now :local)
+        rows (db/query `
+               with users as (
+                              select * from user
+                              inner join mapping on mapping.user_id = user.id
+                              and mapping.contest_id = :id)
+               , recordings as (
+                                select * from recording
+                                inner join users on users.id = recording.user_id
+                                where year = :year
+                                and year_day = :year_day)
+               , todays as (
+                            select
+                            amount,
+                            user_id
+                            from recordings
+                            where year = :year
+                            and year_day = :year_day
+                            group by user_id)
+               select
+                 u.id,
+                 u.name,
+                 coalesce(t.amount, 0) as today
+                 -- rank() over (order by t.amount desc) as rank
+               from users u
+               left join todays t on t.user_id = u.id
+               order by today desc
+               ` {:id contest-id
+                  :year year
+                  :year_day year-day})]
+    {:rank (with-err "Could not calculate ranking for this user"
+             (->> rows
+                  (map |(get $ :id))
+                  (index-of user-id)
+                  (+ 1)))
+     :participants (length rows)
+     :no-recordings (->> rows
+                         (map |(get $ :today))
+                         (reduce2 +)
+                         (= 0))}))
+
+(comment
+  (get-todays-ranking 2 2))
+  
+ 
 
 (defn contents-stats [contest-id]
   ```
