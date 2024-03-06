@@ -61,6 +61,18 @@
                   :on-conflict [:user_id :year :year_day]
                      :do :update :set { :amount amount})))
                    
+(defn total-this-year []
+  ```
+  All total recordings for this year
+  ```
+  (let [{:year year } (os/date (os/time) :local)
+        rows (db/query `
+               select
+               SUM(amount) as total
+               from recording
+               where year = :year` {:year year})]
+      (-> (get rows 0)
+          (get :total 0))))
 
 # TODO: make it one transaction
 (defn create-user
@@ -71,13 +83,6 @@
     (db/insert {:db/table :mapping
                 :user_id (get user :id)
                 :contest_id contest-id})))
-
-(defn get-recordings [contest-id]
-  ```
-  Get all recordings from a contest
-  ```
-  (db/from :recording
-           :where {:contest-id contest-id}))
 
 (defn get-users
   [ids]

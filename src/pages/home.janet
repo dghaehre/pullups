@@ -3,6 +3,7 @@
 (use ../utils)
 (import ../service/general :as g)
 (import ../service/contest :as c)
+(import ../storage :as st)
 
 (def- home/header
   [:header
@@ -18,7 +19,8 @@
     [:button (table/to-struct attr)
       [ "Create competition"]]))
 
-(defn- main [err]
+(defn- main [total-this-year err]
+  (assert (number? total-this-year) "total-today must be a number")
   (let [{:year year} (os/date (os/time) :local)]
     [:main {:style "text-align: center"}
      [:h3 "Create new competition"]
@@ -31,8 +33,11 @@
                  :hx-target "#submit"
                  :placeholder "Name of your group"}]]
       [:p {:id "submit" } (submit true)]
-      [:p {:style "margin-top: 100px"}]
+      [:p {:style "margin-top: 20px"}]
       [:p (string "See who can do the most pullups in " year)]
+      [:hr]
+      [:p {:style "margin-top: 100px"}]
+      [:p (string total-this-year " recorded pullups so far in " year "!")]
       [:p "When you have created a name for your group, you can add participants"]
       (if-not (nil? err) (display-error err))]]))
 
@@ -66,7 +71,7 @@
   [req]
   (let [err (get-in req [:query-string :error])]
     [ home/header
-     (main err)
+     (main (st/total-this-year) err)
      (footer req)]))
 
 (comment
