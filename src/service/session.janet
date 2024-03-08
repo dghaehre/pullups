@@ -16,8 +16,7 @@
 (defn add-session [res token user-id]
   (assert (string? token))
   (assert (number? user-id))
-  (put res :session {:token token :user-id user-id})
-  res)
+  (merge res {:session {:token token :user-id user-id}}))
 
 (defn logout [user-id token]
   (st/delete-session token user-id))

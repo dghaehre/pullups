@@ -24,7 +24,7 @@
 # Middleware
 (def app (-> (handler)
              (layout app-layout)
-             (with-session)
+             (with-session {"Expires" "Thu, 01 Jan 2030 00:00:00 GMT"}) # Lasting a long time..
              (query-string)
              (body-parser)
              (server-error)
