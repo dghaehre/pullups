@@ -12,16 +12,34 @@
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
 (route :post "/create-user" :contest/create-user)
-(route :get "/:contest/:user/get-record-form/:change" :contest/get-record-form)
 
-(defn- record-form [contest user-id current-amount &opt time change]
-  "Where you record your daily stuff..."
+(route :get "/:contest/:user/get-record-form/:change" :contest/get-record-form)
+(route :get "/get-record-form/:user/:change" :contest/get-record-form)
+
+(defn- record-form [contest-name user-id current-amount &opt time change]
+  "Where you record your daily stuff...
+
+  If contest-name is nil, it will be a private user page
+  "
+  (assert (or (nil? contest-name) (string? contest-name)) "contest-name should be nil or string")
   (default time (os/time))
-  (defn new-change [c]
-    (case [change (keyword c)]
-      [:yesterday :tomorrow] "today"
-      [:tomorrow :yesterday] "today"
-      c))
+  (defn link [change-name]
+    ```
+    Supports multiple record endpoints
+    - private user page
+    - recording on contest path
+    ```
+    (assert (or (= change-name :yesterday)
+                (= change-name :tomorrow)) "change-name should be yesterday or tomorrow")
+    (let [new-change (case [change change-name]
+                       [:yesterday :tomorrow] "today"
+                       [:tomorrow :yesterday] "today"
+                       (string change-name))]
+      (if (nil? contest-name)
+        (string "/get-record-form/" user-id "/" new-change)
+        (string "/" (cname contest-name) "/" user-id "/get-record-form/" new-change))))
+
+
   (let [{:year year :month m :month-day md} (os/date time :local)
         day                                 (+ 1 md)
         empty-arrow [:span {:style "margin-right: 12px; margin-left: 12px;" :class "date-arrow"} "   "]]
@@ -34,7 +52,7 @@
           [:span {:style "margin-right: 10px;"
                   :class "date-arrow"
                   :hx-trigger "click"
-                  :hx-get (string "/" (cname (get contest :name)) "/" user-id "/get-record-form/" (new-change "yesterday"))
+                  :hx-get (link :yesterday)
                   :hx-target "#record-form"}
            "⬅"])
         [:span {:style "color: grey; margin: 0px;"} (string day "/" m "/" year)]
@@ -43,13 +61,13 @@
           [:span {:style "margin-left: 10px;"
                   :class "date-arrow"
                   :hx-trigger "click"
-                  :hx-get (string "/" (get contest :name) "/" user-id "/get-record-form/" (new-change "tomorrow"))
+                  :hx-get (link :tomorrow)
                   :hx-target "#record-form"}
            "➡"])]
       [:p
         [:input {:type "text" :placeholder current-amount :name "amount"}]]
-      [:input {:type "hidden" :name "contest-id" :value (get contest :id)}]
-      [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
+      (when (string? contest-name)
+        [:input {:type "hidden" :name "contest-name" :value contest-name}])
       [:input {:type "hidden" :name "year" :value year}]
       [:input {:type "hidden" :name "month-day" :value md}]
       [:input {:type "hidden" :name "change" :value change}]
@@ -76,7 +94,7 @@
      (cond
        (and public-user? logged-in-different-user?)
        [:div
-         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
+         [:div {:id "record-form"} (record-form (get contest :name) (get user :id) (get user :today))]
          [:p "You are logged in as a different user. Since this is a public user, you can still record pullups."]]
 
        (and (not public-user?) logged-in-different-user?)
@@ -86,7 +104,7 @@
 
        (and public-user? (not logged-in-user?))
        [:div
-         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]
+         [:div {:id "record-form"} (record-form (get contest :name) (get user :id) (get user :today))]
          [:p "This user is not owned"
             [:br]
             [:a {:href (string "/take-ownership/" (get user :id))} "Take ownership"]]]
@@ -99,10 +117,10 @@
 
        logged-in-user?
        [:div
-         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]]
+         [:div {:id "record-form"} (record-form (get contest :name) (get user :id) (get user :today))]]
 
        [:div # Ups, this should never happen! But I have this as a fallback
-         [:div {:id "record-form"} (record-form contest (get user :id) (get user :today))]])]))
+         [:div {:id "record-form"} (record-form (get contest :name) (get user :id) (get user :today))]])]))
   
 
 (defn- private-form [user]
@@ -131,19 +149,18 @@
   (let [name        (get-in req [:params :contest])
         user-id     (get-in req [:params :user])
         change      (get-in req [:params :change])
-        contest     (st/get-contest name)
-        user        (st/get-user-from-contest (get contest :id) user-id)
+        user        (st/get-user user-id)
         time        (time-by-change (keyword change))
         today       (st/get-today-amount user-id time)]
-    (text/html (record-form contest user-id today time (keyword change)))))
+    (text/html (record-form name user-id today time (keyword change)))))
 
 (defn contest/user
   [req]
-  (let [err           (get-in req [:query-string :error])
-        contest-name  (get-in req [:params :contest])
-        user-id       (get-in req [:params :user-id])
-        contest       (st/get-contest contest-name)
-        logged-in-userid?    (s/user-id-from-session req)]
+  (let [err                 (get-in req [:query-string :error])
+        contest-name        (get-in req [:params :contest])
+        user-id             (get-in req [:params :user-id])
+        contest             (st/get-contest contest-name)
+        logged-in-userid?   (s/user-id-from-session req)]
     (if (nil? contest)
       (redirect-to :home/index)
       (let [user (st/get-user-from-contest (get contest :id) user-id)]
@@ -158,18 +175,18 @@
 (defn contest/record
   [req]
   (let [user-id       (get-in req [:body :user-id])
-        contest-id    (get-in req [:body :contest-id])
         change        (get-in req [:body :change])
-        contest-name  (get-in req [:body :contest-name])]
+        contest-name  (get-in req [:body :contest-name]) # optional
+        redirect      (fn [&opt err]
+                        (let [e (if (nil? err) {} {:? {:error err}})]
+                          (if (nil? contest-name)
+                            (redirect-to :private/user (merge {:user-id user-id} e))
+                            (redirect-to :contest/user (merge {:contest (cname contest-name) :user-id user-id} e)))))]
     (try
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
-        (user/record user-id (time-by-change (keyword change)) contest-name amount req)
-        (redirect-to :contest/index {:contest (cname contest-name)}))
-
-      ([err fib]
-       (redirect-to :contest/user {:contest (cname contest-name)
-                                   :user-id user-id
-                                   :? {:error err}})))))
+        (user/record user-id (time-by-change (keyword change)) amount req)
+        (redirect))
+      ([err] (redirect err)))))
 
 (defn get/take-ownership [req]
   (let [user-id (get-in req [:params :user-id])
@@ -193,8 +210,9 @@
     (redirect-to :get/login)))
 
 (s/defn-auth private/user [req user-id]
-  (let [user (st/get-user user-id)
-        contests (st/get-contests-by-user user-id)]
+  (let [user     (st/get-user user-id)
+        contests (st/get-contests-by-user user-id)
+        today    (st/get-today-amount user-id (time-by-change :today))]
     [ (header-private (user :name))
       [:main
        [:p "This is your private user page"]
@@ -221,8 +239,10 @@
                               (string rank " of " p))]
               [:tr
                [:td [:a {:href (string "/" name)} name]]
-               [:td rank-text]]))]]]]))
-           # TODO: allow for changing name and password
+               [:td rank-text]]))]]
+       [:br]
+       [:p "Record"]
+       [:div {:id "record-form"} (record-form nil user-id today)]]]))
 
 (comment
   (time-by-change :someth))

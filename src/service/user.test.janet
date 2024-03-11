@@ -27,20 +27,20 @@
   # Record for public user
   (st/create-contest "test-contest")
   (st/create-user "myname" 1)
-  (test (get (record 1 (time-by-change nil) "test-contest" 100) :amount) 100)
+  (test (get (record 1 (time-by-change nil)  100) :amount) 100)
   (test (st/get-today-amount 1) 100)
 
   # Make user private
   (make-private 1 "username" "password")
-  (test (protect (record 1 (time-by-change nil) "test-contest" 200)) [false "not allowed: user is private"])
+  (test (protect (record 1 (time-by-change nil)  200)) [false "not allowed: user is private"])
 
   # with wrong auth
   (def wrong-auth {:session {:token 1 :user-id 1}})
-  (test (protect (record 1 (time-by-change nil) "test-contest" 200 wrong-auth)) [false "not allowed: user is private"])
+  (test (protect (record 1 (time-by-change nil)  200 wrong-auth)) [false "not allowed: user is private"])
 
   (def login-res (session/login "username" "password"))
   (def auth {:session login-res})
-  (test (-> (record 1 (time-by-change nil) "test-contest" 200 auth)
+  (test (-> (record 1 (time-by-change nil)  200 auth)
             (get :amount))
     200))
 

@@ -99,6 +99,7 @@
       time)))
 
 (defn cname [name]
+  (assert (string? name) "Name must be a string")
   (string/replace-all " " "-" name))
 
 (defn from-cname [name]
