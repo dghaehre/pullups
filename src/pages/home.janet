@@ -38,7 +38,8 @@
       [:hr]
       [:p {:style "margin-top: 100px"}]
       [:p (string total-this-year " recorded pullups so far in " year "!")]
-      [:p "When you have created a name for your group, you can add participants"]
+      [:p "When you have created a name for your group, you can add participants."]
+      [:p "Or " [:a {:href "/login"} "login"] " if you already have an account"]
       (if-not (nil? err) (display-error err))]]))
 
 # Routes
@@ -63,7 +64,6 @@
       (with-err "could not create contest" (c/create-contest name))
       (redirect-to :contest/index {:contest (cname name)}))
     ([err _] (redirect-to :home/index { :? {:error err}}))))
-
 
 (defn home/index
   "Home screen
