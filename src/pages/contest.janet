@@ -15,23 +15,25 @@
 
 (defn- overview
   [contest-name users]
-  [:table {:style "display: inline-table; margin: 0;" :class "contest-table"}
-   [:thead
-    [:tr
-     [:th "Name"]
-     [:th "Today"]
-     [:th "Topscore"]
-     [:th "Month"] # TODO: name of month?
-     [:th "Year"]]]
-   [:tbody
-    (flip map users (fn [{:id id :name name :total total :today today :topscore topscore :month month}]
-                     [:tr
-                      [:td
-                       [:a {:href (string "/" (cname contest-name) "/" id) } name]]
-                      [:td today]
-                      [:td topscore]
-                      [:td month]
-                      [:td total]]))]])
+  (let [{:year year :month month} (-> (os/time)
+                                      (os/date :local))]
+    [:table {:style "display: inline-table; margin: 0;" :class "contest-table"}
+     [:thead
+      [:tr
+       [:th "Name"]
+       [:th "Today"]
+       [:th "Topscore"]
+       [:th (name-of-month (+ 1 month))]
+       [:th (string year)]]]
+     [:tbody
+      (flip map users (fn [{:id id :name name :total total :today today :topscore topscore :month month}]
+                       [:tr
+                        [:td
+                         [:a {:href (string "/" (cname contest-name) "/" id) } name]]
+                        [:td today]
+                        [:td topscore]
+                        [:td month]
+                        [:td total]]))]]))
 
 (defn- new-user-form [contest]
   (assert (string? (get contest :name)))

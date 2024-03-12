@@ -152,3 +152,31 @@
 (test (display-ranking 2 3 false) "Second place")
 (test (display-ranking 3 3 false) "Last place")
 (test (display-ranking 1 1 false) "N/A")
+
+(defn name-of-month [&opt month]
+  (default month (-> (os/time)
+                     (os/date :local)
+                     (get :month)
+                     (+ 1)))
+  (assert (and (number? month)
+               (<= 1 month 12)) "invalid month")
+  (case month
+    1 "Jan"
+    2 "Feb"
+    3 "Mar"
+    4 "Apr"
+    5 "May"
+    6 "Jun"
+    7 "Jul"
+    8 "Aug"
+    9 "Sep"
+    10 "Oct"
+    11 "Nov"
+    12 "Dec"
+    (error "Invalid month")))
+
+(test (name-of-month 1) "Jan")
+(test (name-of-month 2) "Feb")
+(test (name-of-month 12) "Dec")
+(test (protect (name-of-month 0))
+  [false "invalid month"])
