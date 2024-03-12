@@ -8,7 +8,7 @@
 (route :post "/take-ownership" :post/take-ownership)
 (route :get "/take-ownership/:user-id" :get/take-ownership)
 
-(route :get "/user/:user-id" :private/user)
+(route :get "/private/user" :private/user)
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
 (route :post "/create-user" :contest/create-user)
@@ -84,7 +84,7 @@
         private-no-access?        (and (not public-user?) (not logged-in-user?))]
     [:main
      (if logged-in-user?
-       [:h3 [:a {:href (string "/user/" (user :id))} (get user :name)]]
+       [:h3 [:a {:href (string "/private/user")} (get user :name)]]
        [:h3 (get user :name)])
      [:hr]
 
@@ -180,7 +180,7 @@
         redirect      (fn [&opt err]
                         (let [e (if (nil? err) {} {:? {:error err}})]
                           (if (nil? contest-name)
-                            (redirect-to :private/user (merge {:user-id user-id} e))
+                            (redirect-to :private/user e)
                             (redirect-to :contest/user (merge {:contest (cname contest-name) :user-id user-id} e)))))]
     (try
       (let [amount (with-err "Not a valid number" (int/to-number (int/u64 (get-in req [:body :amount]))))]
