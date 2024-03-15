@@ -44,3 +44,15 @@
             (get :amount))
     200))
 
+(deftest: with-db "join-contest" [_]
+  (st/create-contest "test-contest")
+  (def user-id (-> (st/create-user "myname" 1)
+                   (get :id)))
+  (test (get (make-private user-id "dghaehre" "test") :username) "dghaehre")
+  (def new-contest-id (-> (st/create-contest "another-contest")
+                          (get :id)))
+  (test (st/join-contest user-id new-contest-id) @[])
+  # validate
+  (test (-> (st/get-user-from-contest new-contest-id user-id)
+            (get :username))
+    "dghaehre"))

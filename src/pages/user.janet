@@ -189,12 +189,14 @@
       ([err] (redirect err)))))
 
 (s/defn-auth contest/join-contest [req user-id]
-  (let [contest-id    (get-in req [:body :contest-id])
+  (let [contest-id    (as-> (get-in req [:body :contest-id]) ?
+                            (with-err "Not a valid contest id" (int/to-number (int/u64 ?))))
         contest-name  (get-in req [:body :contest-name])]
     (assert (and (string? contest-name)
                  (not (= contest-name ""))))
     (assert (not= user-id (get-in req [:body :user-id])))
-    (st/join-contest)))
+    (st/join-contest user-id contest-id)
+    (redirect-to :contest/index {:contest (cname contest-name)})))
 
 (defn get/take-ownership [req]
   (let [user-id (get-in req [:params :user-id])

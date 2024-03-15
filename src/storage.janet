@@ -301,7 +301,12 @@
       (error "No user found with that username")
       (get users 0))))
 
-(defn join-contest [user-id contest-id])
+(defn join-contest [user-id contest-id]
+  (assert (number? user-id))
+  (assert (number? contest-id))
+  (db/query `
+   insert into mapping (user_id, contest_id)
+   values (:user_id, :contest_id)` {:user_id user-id :contest_id contest-id}))
 
 (defn insert-session [user-id token]
   (assert (number? user-id))
