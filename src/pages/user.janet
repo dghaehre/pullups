@@ -233,23 +233,10 @@
           [:th "Todays ranking"]]]
         [:tbody
           (seq [{:name name :id id} :in contests]
-            (let [{:rank rank :participants p :no-recordings nr} (st/get-todays-ranking id user-id)
-                  rank-text (cond
-                              nr
-                              "No recordings"
-
-                              (and (> p 2)
-                                   (= rank p))
-                              "Last place"
-
-                              (and (> p 2)
-                                   (= rank 1))
-                              "First place"
-                              
-                              (string rank " of " p))]
+            (let [{:rank rank :participants p :no-recordings nr} (st/get-todays-ranking id user-id)]
               [:tr
                [:td [:a {:href (string "/" name)} name]]
-               [:td rank-text]]))]]
+               [:td (display-ranking rank p nr)]]))]]
        [:br]
        [:p "Record"]
        [:div {:id "record-form"} (record-form nil user-id today)]]]))

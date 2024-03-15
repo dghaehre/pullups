@@ -1,4 +1,5 @@
 (use joy)
+(use judge)
 
 (defn unique-user-ids
   "Take in a list of recordings, and return a list of unique user ids."
@@ -121,3 +122,33 @@
 
 (defmacro silent [body]
   ~(try ,body ([_] nil)))
+
+(defn display-ranking [rank p no-recordings]
+  (assert (number? rank))
+  (assert (number? p))
+  (cond
+     no-recordings
+     "No recordings"
+
+     (and (> p 2)
+          (= rank p))
+     "Last place"
+
+     (and (> p 1)
+          (= rank 1))
+     "First place"
+
+     (and (> p 2)
+          (= rank 2))
+     "Second place"
+
+     (= p 1)
+     "N/A"
+                      
+     (string rank " of " p)))
+
+(test (display-ranking 1 10 false) "First place")
+(test (display-ranking 2 10 false) "Second place")
+(test (display-ranking 2 3 false) "Second place")
+(test (display-ranking 3 3 false) "Last place")
+(test (display-ranking 1 1 false) "N/A")
