@@ -16,6 +16,8 @@
 (route :get "/:contest/:user/get-record-form/:change" :contest/get-record-form)
 (route :get "/get-record-form/:user/:change" :contest/get-record-form)
 
+(route :post "/join-contest" :contest/join-contest)
+
 (defn- record-form [contest-name user-id current-amount &opt time change]
   "Where you record your daily stuff...
 
@@ -154,8 +156,7 @@
         today       (st/get-today-amount user-id time)]
     (text/html (record-form name user-id today time (keyword change)))))
 
-(defn contest/user
-  [req]
+(defn contest/user [req]
   (let [err                 (get-in req [:query-string :error])
         contest-name        (get-in req [:params :contest])
         user-id             (get-in req [:params :user-id])
@@ -172,8 +173,7 @@
               (layout user contest logged-in-userid? err)
               (footer req (get contest :id))]))))))
 
-(defn contest/record
-  [req]
+(defn contest/record [req]
   (let [user-id       (get-in req [:body :user-id])
         change        (get-in req [:body :change])
         contest-name  (get-in req [:body :contest-name]) # optional
@@ -187,6 +187,14 @@
         (user/record user-id (time-by-change (keyword change)) amount req)
         (redirect))
       ([err] (redirect err)))))
+
+(s/defn-auth contest/join-contest [req user-id]
+  (let [contest-id    (get-in req [:body :contest-id])
+        contest-name  (get-in req [:body :contest-name])]
+    (assert (and (string? contest-name)
+                 (not (= contest-name ""))))
+    (assert (not= user-id (get-in req [:body :user-id])))
+    (st/join-contest)))
 
 (defn get/take-ownership [req]
   (let [user-id (get-in req [:params :user-id])

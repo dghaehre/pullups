@@ -301,6 +301,8 @@
       (error "No user found with that username")
       (get users 0))))
 
+(defn join-contest [user-id contest-id])
+
 (defn insert-session [user-id token]
   (assert (number? user-id))
   (assert (string? token))

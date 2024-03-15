@@ -33,8 +33,9 @@
                       [:td month]
                       [:td total]]))]])
 
-(defn- new-user-form
-  [contest]
+(defn- new-user-form [contest]
+  (assert (string? (get contest :name)))
+  (assert (number? (get contest :id)))
   [:details {:class "new-user-form"}
    [:summary "Add user"]
    [:form {:method "post" :action "/create-user"}
@@ -43,13 +44,38 @@
     [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
     [:button {:type "submit" :style "width: 100%"} "Add user"]]])
 
-(defn- main/content [contest err]
+(defn- new-private-form [contest logged-in-userid]
+  (assert (or (number? logged-in-userid)
+              (nil?    logged-in-userid)))
+  (assert (string? (get contest :name)))
+  (assert (number? (get contest :id)))
+  (let [username (-> (st/get-user logged-in-userid)
+                     (get :username))]
+    [:details {:class "new-user-form"}
+     [:summary "Join contest"]
+     [:form {:method "post" :action "/join-contest"}
+      [:p (string "Join the contest as " username)]
+      [:input {:type "hidden" :name "user-id" :value logged-in-userid}]
+      [:input {:type "hidden" :name "contest-id" :value (get contest :id)}]
+      [:input {:type "hidden" :name "contest-name" :value (get contest :name)}]
+      [:button {:type "submit" :style "width: 100%"} (string "Join " (get contest :name))]]]))
+
+(defn- main/content [contest logged-in-userid err]
+  (assert (or (number? logged-in-userid)
+              (nil?    logged-in-userid)))
+  (assert (string? (get contest :name)))
+  (assert (number? (get contest :id)))
+
   (let [id          (get contest :id)
         name        (get contest :name)
-        users       (st/contents-stats id)] # TODO
+        users       (st/contents-stats id)
+        user-part-of-contest (when (not (nil? logged-in-userid))
+                                (not (nil? (st/get-user-from-contest id logged-in-userid))))]
     [:main
      (overview (get contest :name) users)
-     (new-user-form contest)
+     (if (and logged-in-userid (not user-part-of-contest))
+       (new-private-form contest logged-in-userid)
+       (new-user-form contest))
      (if-not (nil? err) (display-error err))
      (chart/loader name)]))
 
@@ -58,17 +84,16 @@
 (route :get "/:contest" :contest/index)
 (route :get "/:contest/get-chart" :contest/get-chart)
 
-(defn contest/index
-  [req]
+(defn contest/index [req]
   (let [name               (get-in req [:params :contest])
         err                (get-in req [:query-string :error])
         contest            (st/get-contest name)
-        logged-in-userid?  (s/user-id-from-session req)]
+        logged-in-userid  (s/user-id-from-session req)]
     (if (nil? contest)
       (redirect-to :home/index)
       [[:script {:src "/xxx.chart.js"}]
-       (header (get contest :name) logged-in-userid?)
-       (main/content contest err)
+       (header (get contest :name) logged-in-userid)
+       (main/content contest logged-in-userid err)
        (footer req (get contest :id))])))
 
 (defn contest/get-chart [req]
