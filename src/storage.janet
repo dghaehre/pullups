@@ -105,20 +105,20 @@
    on u.id = m.user_id
    and m.contest_id = :contestid` {:contestid contest-id}))
 
-# TODO: remove
 (defn get-today-amount [user-id &opt time]
-  "Get todays amount for given user"
+  "Get todays amount for given user
+
+  Returns 0 if no recording is found.
+  "
   (default time (os/time))
-  (try
-    (let [{:year-day year-day :year year } (os/date time :local)]
-      (or (-?> (db/from :recording
-                        :where {:user-id user-id
-                                :year year
-                                :year-day year-day})
-               (get 0)
-               (get :amount))
-          0))
-    ([err _] (do (pp err) 0))))
+  (let [{:year-day year-day :year year } (os/date time :local)]
+    (or (-?> (db/from :recording
+                      :where {:user-id user-id
+                                   :year year
+                                   :year-day year-day})
+             (get 0)
+             (get :amount))
+        0)))
 
 (defn get-todays-ranking [contest-id user-id]
   (let [now (os/time)
