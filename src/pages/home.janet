@@ -3,6 +3,7 @@
 (use ../utils)
 (import ../service/general :as g)
 (import ../service/contest :as c)
+(import ../service/session :as s)
 (import ../storage :as st)
 
 (def- home/header
@@ -19,10 +20,14 @@
     [:button (table/to-struct attr)
       [ "Create competition"]]))
 
-(defn- main [total-this-year err]
+(defn- main [total-this-year logged-in? err]
   (assert (number? total-this-year) "total-today must be a number")
+  (assert (boolean? logged-in?))
   (let [{:year year} (os/date (os/time) :local)]
     [:main {:style "text-align: center"}
+     (when logged-in?
+       [:a {:href "/private/user"}
+           [:button "Your page"]])
      [:h3 "Create new competition"]
      [:form {:method "post" :action "/create-contest"}
       [:p
@@ -69,9 +74,10 @@
   "Home screen
   Let user create a new 'contest'"
   [req]
-  (let [err (get-in req [:query-string :error])]
+  (let [err (get-in req [:query-string :error])
+        logged-in? (not (nil? (s/user-id-from-session req)))]
     [ home/header
-     (main (st/total-this-year) err)
+     (main (st/total-this-year) logged-in? err)
      (footer req)]))
 
 (comment
