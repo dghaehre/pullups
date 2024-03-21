@@ -9,6 +9,8 @@
 (route :get "/take-ownership/:user-id" :get/take-ownership)
 
 (route :get "/private/user" :private/user)
+(route :get "/private/edit-contest/:id" :private/edit-contest)
+(route :post "/private/edit-contest/:id" :post/edit-contest)
 (route :get "/:contest/:user-id" :contest/user)
 (route :post "/record" :contest/record)
 (route :post "/create-user" :contest/create-user)
@@ -240,6 +242,58 @@
        [:br]
        [:p "Record"]
        [:div {:id "record-form"} (record-form nil user-id today)]]]))
+
+(s/defn-auth private/edit-contest [req user-id]
+  (let [user (st/get-user user-id)
+        contest-id (get-in req [:params :id])
+        err        (get-in req [:query-string :error])
+        contest    (st/get-contest-from-id contest-id)]
+    (if (nil? contest)
+      (redirect-to :home/index)
+      [ (header-private (user :name))
+        [:main
+         [:h3 "Edit contest"]
+         [:p "This is where you can edit the contest"]
+         (if (not (nil? err))
+           [:p {:style "color: red;"} err]
+           [:br])
+         [:form {:action (string "/private/edit-contest/" contest-id)
+                 :method "post"
+                 :style "max-width: 500px;"}
+          [:input {:type "hidden" :name "contest-id" :value contest-id}]
+          [:p
+            [:label "Contest name"]
+            [:input {:type "text" :name "name" :value (get contest :name)}]]
+          [:p
+           [:label
+             [:input {:type "checkbox" :name "private"}] # TODO
+             "Private contest"]]
+          [:details 
+           [:summary "Start and end date"]
+           [:div
+             [:p "When you create a contest it will not have a start date or end date. If you want you can add these dates here."]
+             [:p
+                [:label "Start date"]
+                [:input {:type "date" :name "start-date" :value (get contest :start-date)}]]
+             [:p
+               [:label "End date"]
+               [:input {:type "date" :name "end-date" :value (get contest :end-date)}]]]]
+          [:br]
+          [:button {:type "submit"} "Update"]]]])))
+
+(s/defn-auth post/edit-contest [req user-id]
+  (let [name       (get-in req [:body :name])
+        # start-date (get-in req [:body :start-date]) TODO
+        # end-date   (get-in req [:body :end-date]) TODO
+        contest-id (get-in req [:params :id])]
+    (try
+      (do
+        (when (not (available-contest-name? name))
+          (error "Invalid or contest name already exists"))
+        (st/update-contest contest-id name)
+        (redirect-to :private/edit-contest {:id contest-id}))
+      ([err] (redirect-to :private/edit-contest {:id contest-id :? {:error err}})))))
+    
 
 (comment
   (time-by-change :someth))

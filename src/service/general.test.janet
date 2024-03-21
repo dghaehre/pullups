@@ -11,5 +11,6 @@
   (test (available-contest-name? "some other stuff") true)
   (test (available-contest-name? "something") true)
   (test (available-contest-name? "admin") false)
+  (test (available-contest-name? "logout") false)
   (st/create-contest "something")
   (test (available-contest-name? "something") false))

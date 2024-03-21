@@ -16,20 +16,32 @@
   [:header
     [:div {:style "display: flex; justify-content: space-around;"}
       [:a {:style "width: 30px;"}]
-      [:a {:href (string "/" name)
+      [:a {:href "/private/user"
            :style "color: var(--text); text-decoration: none;"}
         [:h3 {:style "margin: 20px 0px -5px"} name]]
       [:a {:class "logout" :style "width: 30px; padding-top: 20px;"
            :href "/logout"} "logout"]]])
 
-(defn header
-  [name &opt logged-in?]
-  (if logged-in?
-    (header-private name)
-    [:header
-      [:a {:href (string "/" name)
+(defn header-private-contest
+  [contest-name]
+  [:header
+    [:div {:style "display: flex; justify-content: space-around;"}
+      [:a {:style "width: 30px;"}]
+      [:a {:href (string "/" contest-name)
            :style "color: var(--text); text-decoration: none;"}
-        [:h3 {:style "margin: 20px 0px -5px"} name]]]))
+        [:h3 {:style "margin: 20px 0px -5px"} contest-name]]
+      [:a {:class "logout" :style "width: 30px; padding-top: 20px;"
+           :href "/logout"} "logout"]]])
+
+
+(defn header
+  [contest-name &opt logged-in?]
+  (if logged-in?
+    (header-private-contest contest-name)
+    [:header
+      [:a {:href (string "/" contest-name)
+           :style "color: var(--text); text-decoration: none;"}
+        [:h3 {:style "margin: 20px 0px -5px"} contest-name]]]))
 
 (defn display-error [err]
   (let [red {:style "color: #E24556"}

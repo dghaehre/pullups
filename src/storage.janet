@@ -37,6 +37,9 @@
    inner join mapping m on m.contest_id = c.id
    where m.user_id = :userid` {:userid user-id}))
 
+(defn update-contest [contest-id name]
+  (db/update :contest {:id contest-id} {:name name}))
+
 (defn insert-feedback [message &opt contest-id]
   (db/insert {:db/table :feedback
               :message message

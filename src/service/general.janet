@@ -6,7 +6,14 @@
 (defn valid-contest-name?
   "Is given name valid?"
   [name]
-  (let [not-valid-names @["admin" "blog" "about" "terms" "login"]]
+  (let [not-valid-names @["user"
+                          "private"
+                          "admin"
+                          "blog"
+                          "about"
+                          "terms"
+                          "logout"
+                          "login"]]
     (and
       (< 2 (length name))
       (empty? (filter |(= name $0) not-valid-names)))))
