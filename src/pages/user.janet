@@ -2,6 +2,7 @@
 (use utils)
 (use ../utils)
 (import ../storage :as st)
+(import ../service/general :as g)
 (import ../service/user :as user)
 (import ../service/session :as s)
 
@@ -288,7 +289,7 @@
         contest-id (get-in req [:params :id])]
     (try
       (do
-        (when (not (available-contest-name? name))
+        (when (not (g/available-contest-name? name))
           (error "Invalid or contest name already exists"))
         (st/update-contest contest-id name)
         (redirect-to :private/edit-contest {:id contest-id}))
