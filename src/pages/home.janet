@@ -20,7 +20,7 @@
     [:button (table/to-struct attr)
       [ "Create competition"]]))
 
-(defn- main [total-this-year logged-in? err]
+(defn- main [total-this-year logged-in? last-visisted-contest err]
   (assert (number? total-this-year) "total-today must be a number")
   (assert (boolean? logged-in?))
   (let [{:year year} (os/date (os/time) :local)]
@@ -40,6 +40,10 @@
       [:p {:id "submit" } (submit true)]
       [:p {:style "margin-top: 20px"}]
       [:p (string "See who can do the most pullups in " year)]
+      (when (string? last-visisted-contest)
+        [:div
+         [:br]
+         [:p "Last visisted: " [:a {:href (string "/" last-visisted-contest)} last-visisted-contest]]])
       [:hr]
       [:p {:style "margin-top: 100px"}]
       [:p (string total-this-year " recorded pullups so far in " year "!")]
@@ -75,9 +79,10 @@
   Let user create a new 'contest'"
   [req]
   (let [err (get-in req [:query-string :error])
-        logged-in? (not (nil? (s/user-id-from-session req)))]
+        logged-in? (not (nil? (s/user-id-from-session req)))
+        last-visisted-contest (s/get-last-visited req)]
     [ home/header
-     (main (st/total-this-year) logged-in? err)
+     (main (st/total-this-year) logged-in? last-visisted-contest err)
      (footer req)]))
 
 (comment

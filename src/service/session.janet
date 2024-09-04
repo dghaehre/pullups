@@ -3,6 +3,13 @@
 (import ./password :as pw)
 (import uuid)
 
+(defn add-last-visited [res contest-name]
+  (assert (string? contest-name))
+  (merge res {:session {:last-visisted contest-name}}))
+
+(defn get-last-visited [req]
+  (get-in req [:session :last-visisted]))
+
 (defn login [username password]
   (assert (string? username) "Not a valid username")
   (assert (string? password) "Not a valid password")

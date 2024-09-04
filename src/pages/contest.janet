@@ -7,12 +7,6 @@
 
 # Views
 
-(defn- list-users
-  [users]
-  (defn list [{:name name}]
-    [:li name])
-  [:ul (map list users)])
-
 (defn- overview
   [contest-name users]
   (let [{:year year :month month} (-> (os/time)
@@ -26,14 +20,14 @@
        [:th (name-of-month (+ 1 month))]
        [:th (string year)]]]
      [:tbody
-      (flip map users (fn [{:id id :name name :total total :today today :topscore topscore :month month}]
-                       [:tr
-                        [:td
-                         [:a {:href (string "/" (cname contest-name) "/" id) } name]]
-                        [:td today]
-                        [:td topscore]
-                        [:td month]
-                        [:td total]]))]]))
+      (seq [{:id id :name name :total total :today today :topscore topscore :month month} :in users]
+         [:tr
+          [:td [:a {:href (string "/" (cname contest-name) "/" id) } name]]
+          [:td today]
+          [:td topscore]
+          [:td month]
+          [:td total]])]]))
+
 
 (defn- new-user-form [contest]
   (assert (string? (get contest :name)))
@@ -90,9 +84,17 @@
   (let [name               (get-in req [:params :contest])
         err                (get-in req [:query-string :error])
         contest            (st/get-contest name)
-        logged-in-userid  (s/user-id-from-session req)]
-    (if (nil? contest)
+        logged-in-userid   (s/user-id-from-session req)
+        last-visited       (s/get-last-visited req)]
+    (cond
+      (nil? contest)
       (redirect-to :home/index)
+
+      (or (nil? last-visited)
+          (not= last-visited name))
+      (-> (redirect-to :contest/index {:contest name})
+          (s/add-last-visited name))
+
       [[:script {:src "/xxx.chart.js"}]
        (header (get contest :name) logged-in-userid)
        (main/content contest logged-in-userid err)
