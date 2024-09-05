@@ -203,6 +203,7 @@
 
 (defn get/take-ownership [req]
   (let [user-id (get-in req [:params :user-id])
+        err     (get-in req [:query-string :error])
         user (st/get-user user-id)
         is-private (or (not (nil? (user :username))) (not (nil? (user :password))))]
     (when is-private # TODO: better way of handling this case
@@ -212,6 +213,9 @@
         [:h3 "Taking ownership of " (user :name)]
         [:p "By providing a username and password to an existing user, you can claim ownership of that user. This means that only you can update the user's information and record pullups for the user."]
         [:p "You will also be able to use the same user for multiple contests."]
+        (when (not (nil? err))
+          [[:br]
+           [:p {:style "color: red;"} err]])
         [:br]
         (private-form {:id user-id})]]))
 
@@ -219,8 +223,11 @@
   (let [user-id (get-in req [:body :user-id])
         password (get-in req [:body :password])
         username (get-in req [:body :username])]
-    (user/make-private user-id username password)
-    (redirect-to :get/login)))
+    (try
+      (do
+        (user/make-private user-id username password)
+        (redirect-to :get/login))
+      ([err] (redirect-to :get/take-ownership {:user-id user-id :? {:error err}})))))
 
 (s/defn-auth private/user [req user-id]
   (let [user     (st/get-user user-id)
@@ -238,7 +245,7 @@
           (seq [{:name name :id id} :in contests]
             (let [{:rank rank :participants p :no-recordings nr} (st/get-todays-ranking id user-id)]
               [:tr
-               [:td [:a {:href (string "/" name)} name]]
+               [:td [:a {:href (string "/" (cname name))} name]]
                [:td (display-ranking rank p nr)]]))]]
        [:br]
        [:p "Record"]

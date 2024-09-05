@@ -93,7 +93,7 @@
       (or (nil? last-visited)
           (not= last-visited name))
       (-> (redirect-to :contest/index {:contest name})
-          (s/add-last-visited name))
+          (s/add-last-visited req name))
 
       [[:script {:src "/xxx.chart.js"}]
        (header (get contest :name) logged-in-userid)

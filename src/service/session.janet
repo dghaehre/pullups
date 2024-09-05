@@ -1,14 +1,22 @@
 (use joy)
+(use judge)
 (import ../storage :as st)
 (import ./password :as pw)
 (import uuid)
 
-(defn add-last-visited [res contest-name]
+(defn add-last-visited [res req contest-name]
   (assert (string? contest-name))
-  (merge res {:session {:last-visisted contest-name}}))
+  (let [session (get req :session {})]
+    (merge res {:session (merge session {:last-visited contest-name})})))
+
+(test (-> {:body "body"
+           :session {:token "hey"}}
+        (add-last-visited  {} "contest"))
+  @{:body "body"
+    :session @{:last-visited "contest"}})
 
 (defn get-last-visited [req]
-  (get-in req [:session :last-visisted]))
+  (get-in req [:session :last-visited]))
 
 (defn login [username password]
   (assert (string? username) "Not a valid username")
@@ -24,6 +32,7 @@
   (assert (string? token))
   (assert (number? user-id))
   (merge res {:session {:token token :user-id user-id}}))
+
 
 (defn logout [user-id token]
   (st/delete-session token user-id))
