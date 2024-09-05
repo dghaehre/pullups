@@ -26,13 +26,12 @@
   [contest-name]
   [:header
     [:div {:style "display: flex; justify-content: space-around;"}
-      [:a {:style "width: 30px;"}]
+      [:a {:style "width: 100px;"}]
       [:a {:href (string "/" contest-name)
            :style "color: var(--text); text-decoration: none;"}
         [:h3 {:style "margin: 20px 0px -5px"} contest-name]]
-      [:a {:class "logout" :style "width: 30px; padding-top: 20px;"
-           :href "/logout"} "logout"]]])
-
+      [:a {:class "logout" :style "width: 100px; padding-top: 20px;"
+           :href "/private/user"} "your page"]]])
 
 (defn header
   [contest-name &opt logged-in?]
