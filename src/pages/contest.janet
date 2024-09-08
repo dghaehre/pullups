@@ -111,4 +111,4 @@
     (let [id (get contest :id)
           general-chart-data (st/get-chart-data id)
           month-chart-data (st/get-chart-data-month id)]
-      (chart/overview general-chart-data month-chart-data))))
+      (text/html (chart/overview general-chart-data month-chart-data)))))

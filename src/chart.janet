@@ -27,9 +27,9 @@
   ```
   (let [t (os/time)] # Now
     (flip map (reverse (range n)) (fn [i]
-      (let [newtime (- t (* 60 60 24 i)) # minus one day times i
-            {:year y :month m :month-day d} (os/date newtime)]
-        (string (+ 1 d) "/" (+ 1 m) "/" y))))))
+                                   (let [newtime (- t (* 60 60 24 i)) # minus one day times i
+                                         {:year y :month m :month-day d} (os/date newtime)]
+                                     (string (+ 1 d) "/" (+ 1 m) "/" y))))))
 
 (defn rec-stats [users-with-recs]
   (let [all-recs      (flatten (map |(get $0 :recs) users-with-recs))
@@ -53,13 +53,12 @@
   (default typ :aggregate)
   (fn [i user]
     ```
-    Returns @{
-      :label: 'My First dataset'
-      :backgroundColor: 'rgb(255, 99, 132)'
-      :borderColor: 'rgb(255, 99, 132)'
-      :data: [0, 10, 5, 2, 20, 30, 45]
-    }
-  ```
+    Returns @{:label: 'My First dataset'
+              :backgroundColor: 'rgb(255, 99, 132)'
+              :borderColor: 'rgb(255, 99, 132)'
+              :data: [0, 10, 5, 2, 20, 30, 45]}
+    
+   ```
     (var user-data @[])
     # Loop through start-day through end-day and populate user-data
     (loop [i :range [0 (get stats :days-of-data)]]
