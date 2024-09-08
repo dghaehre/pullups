@@ -79,21 +79,44 @@
 
 (defn- create-chart [data labels typ]
   [:script (raw (string "
-const data"(string typ)" = {
-  labels: " (json/encode labels) ",
-  datasets: " (json/encode data) "
-};
+if (typeof data"(string typ)" !== 'undefined') {
+  let data"(string typ)" = {
+    labels: " (json/encode labels) ",
+    datasets: " (json/encode data) "
+  };
+} else {
+  data"(string typ)" = {
+    labels: " (json/encode labels) ",
+    datasets: " (json/encode data) "
+  };
+}
 
-const config"(string typ)" = {
-  type: 'line',
-  data: data"(string typ)",
-  options: {}
-};
+if (typeof config"(string typ)" !== 'undefined') {
+  let config"(string typ)" = {
+    type: 'line',
+    data: data"(string typ)",
+    options: {}
+  };
+} else {
+  config"(string typ)" = {
+    type: 'line',
+    data: data"(string typ)",
+    options: {}
+  };
+}
 
-const myChart"(string typ)" = new Chart(
-  document.getElementById('chart-" (string typ)"'),
-  config"(string typ)"
-);"))])
+if (typeof myChart"(string typ)" !== 'undefined') {
+  let myChart"(string typ)" = new Chart(
+    document.getElementById('chart-" (string typ)"'),
+    config"(string typ)"
+  );
+} else {
+  myChart"(string typ)" = new Chart(
+    document.getElementById('chart-" (string typ)"'),
+    config"(string typ)"
+  );
+}
+"))])
 
 (defn overview [general-chart-data month-data]
   (let [users-with-recs       (reduce padd-users @[] general-chart-data)
