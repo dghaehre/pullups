@@ -16,10 +16,6 @@
   cursor: pointer;
 }
 
-.chart-loader {
-  height: 720px;
-}
-
 .header-private {
 	background-color: var(--private-bg);
 }
@@ -33,10 +29,6 @@
     width: 150%;
     right: 25%;
     position: relative;
-  }
-
-  .chart-loader {
-    height: 1440px
   }
 }
 
@@ -59,9 +51,5 @@
 
   .new-user-form button {
     font-size: 15px;
-  }
-
-  .chart-loader {
-    height: 500px;
   }
 }

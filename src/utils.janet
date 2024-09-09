@@ -56,7 +56,7 @@
 (defn footer [req &opt contest-id]
   (let [success     (get-in req [:query-string :feedback-success])
         err         (get-in req [:query-string :feedback-error])]
-    [:footer {:style "margin-top: 35rem"}
+    [:footer
       (if-not (nil? success)
         (display-success success))
       (if-not (nil? err)
