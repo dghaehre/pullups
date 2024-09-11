@@ -97,8 +97,7 @@
 
       [[:script {:src "/xxx.chart.js"}]
        (header (get contest :name) logged-in-userid)
-       (main/content contest logged-in-userid err)
-       (footer req (get contest :id))])))
+       (main/content contest logged-in-userid err)])))
 
 (defn contest/get-chart [req]
   ```

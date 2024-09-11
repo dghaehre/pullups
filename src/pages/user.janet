@@ -172,9 +172,8 @@
           (redirect-to :contest/index {:contest (cname contest-name)})
           (do
             (put user :today (st/get-today-amount user-id))
-            [ (header contest-name logged-in-userid?)
-              (layout user contest logged-in-userid? err)
-              (footer req (get contest :id))]))))))
+            [(header contest-name logged-in-userid?)
+             (layout user contest logged-in-userid? err)]))))))
 
 (defn contest/record [req]
   (let [user-id       (get-in req [:body :user-id])
@@ -214,8 +213,7 @@
         [:p "By providing a username and password to an existing user, you can claim ownership of that user. This means that only you can update the user's information and record pullups for the user."]
         [:p "You will also be able to use the same user for multiple contests."]
         (when (not (nil? err))
-          [[:br]
-           [:p {:style "color: red;"} err]])
+          [notice-error err])
         [:br]
         (private-form {:id user-id})]]))
 
@@ -240,13 +238,15 @@
         [:thead
          [:tr
           [:th "Your contests"]
-          [:th "Todays ranking"]]]
+          [:th "Todays ranking"]
+          [:th ""]]]
         [:tbody
           (seq [{:name name :id id} :in contests]
             (let [{:rank rank :participants p :no-recordings nr} (st/get-todays-ranking id user-id)]
               [:tr
                [:td [:a {:href (string "/" (cname name))} name]]
-               [:td (display-ranking rank p nr)]]))]]
+               [:td (display-ranking rank p nr)]
+               [:td [:a {:href (string "/private/edit-contest/" id)} "Edit"]]]))]]
        [:br]
        [:p "Record"]
        [:div {:id "record-form"} (record-form nil user-id today)]]]))
@@ -255,16 +255,22 @@
   (let [user (st/get-user user-id)
         contest-id (get-in req [:params :id])
         err        (get-in req [:query-string :error])
-        contest    (st/get-contest-from-id contest-id)]
+        contest    (st/get-contest-from-id contest-id)
+        flash       (get-in req [:query-string :flash])]
     (if (nil? contest)
       (redirect-to :home/index)
       [ (header-private (user :name))
         [:main
          [:h3 "Edit contest"]
-         [:p "This is where you can edit the contest"]
-         (if (not (nil? err))
-           [:p {:style "color: red;"} err]
-           [:br])
+         (cond
+           (not (nil? err))
+           [notice-error err]
+
+           (not (nil? flash))
+           [notice flash]
+           
+           [:p {:style "height: 28px;"}])
+
          [:form {:action (string "/private/edit-contest/" contest-id)
                  :method "post"
                  :style "max-width: 500px;"}
@@ -273,9 +279,8 @@
             [:label "Contest name"]
             [:input {:type "text" :name "name" :value (get contest :name)}]]
           [:p
-           [:label
-             [:input {:type "checkbox" :name "private"}] # TODO
-             "Private contest"]]
+           [:label "Private contest"]
+           [:input {:type "checkbox" :name "private"}]] # TODO
           [:details 
            [:summary "Start and end date"]
            [:div
@@ -299,7 +304,7 @@
         (when (not (g/available-contest-name? name))
           (error "Invalid or contest name already exists"))
         (st/update-contest contest-id name)
-        (redirect-to :private/edit-contest {:id contest-id}))
+        (redirect-to :private/edit-contest {:id contest-id :? {:flash "Contest updated"}}))
       ([err] (redirect-to :private/edit-contest {:id contest-id :? {:error err}})))))
     
 

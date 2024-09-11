@@ -5,6 +5,11 @@
   --accent-text: #88C0D0;
   --accent-bg: #22272e;
   --private-bg: #B48EAD;
+	--error: #ff6383;
+}
+
+label {
+	display: block;
 }
 
 .date-arrow {
@@ -52,4 +57,30 @@
   .new-user-form button {
     font-size: 15px;
   }
+}
+
+@keyframes slideIn {
+	0% {
+		transform: translateX(100%);
+	}
+
+	100% {
+		transform: translateX(0);
+	}
+}
+
+.slide-in-animation {
+	animation: slideIn 0.3s ease-in-out;
+}
+
+.error {
+	color: var(--error);
+}
+
+.notice {
+	background: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1.5rem;
+  margin: 2rem 0;
 }

@@ -29,7 +29,7 @@
       [:input {:type "password" :name "password" :placeholder "Password"}]
       [:input {:type "submit" :value "Login"}]]
      (when (not (nil? err))
-       [:p {:class "error"} err])]))
+       [notice-error err])]))
 
 (defn session/logout [req]
   (let [token (get-in req [:session :token])
