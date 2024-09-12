@@ -95,7 +95,7 @@
       (-> (redirect-to :contest/index {:contest name})
           (s/add-last-visited req name))
 
-      [[:script {:src "/xxx.chart.js"}]
+      [[:script {:src "/xxx.chart.js" :defer ""}]
        (header (get contest :name) logged-in-userid)
        (main/content contest logged-in-userid err)])))
 
