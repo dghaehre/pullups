@@ -49,7 +49,7 @@
       [:p (string total-this-year " recorded pullups so far in " year "!")]
       [:p "When you have created a name for your group, you can add participants."]
       [:p "Or " [:a {:href "/login"} "login"] " if you already have an account"]
-      (if-not (nil? err) (display-error err))]]))
+      (if-not (nil? err) [notice-error err])]]))
 
 # Routes
 

@@ -72,7 +72,7 @@
      (if (and logged-in-userid (not user-part-of-contest))
        (new-private-form contest logged-in-userid)
        (new-user-form contest))
-     (if-not (nil? err) (display-error err))
+     (if-not (nil? err) [notice-error err])
      (chart/loader name)]))
 
 # Routes

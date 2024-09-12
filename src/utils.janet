@@ -1,6 +1,9 @@
 (use joy)
 (use judge)
 
+(def notice-error :p.notice.error.slide-in-animation)
+(def notice :p.notice.slide-in-animation)
+
 (defn unique-user-ids
   "Take in a list of recordings, and return a list of unique user ids."
   [recordings]
@@ -42,25 +45,14 @@
            :style "color: var(--text); text-decoration: none;"}
         [:h3 {:style "margin: 20px 0px -5px"} contest-name]]]))
 
-(defn display-error [err]
-  (let [red {:style "color: #E24556"}
-        grey {:style "color: #DDD9D4"}]
-    [:h5
-     [:span red "[error] "]
-     [:span grey err]]))
-
-(defn display-success [msg]
-  (let [grey {:style "color: #DDD9D4"}] #TODO
-    [:h5 grey msg]))
-
 (defn footer [req &opt contest-id]
   (let [success     (get-in req [:query-string :feedback-success])
         err         (get-in req [:query-string :feedback-error])]
     [:footer
       (if-not (nil? success)
-        (display-success success))
+        [notice success])
       (if-not (nil? err)
-        (display-error err))
+        [notice-error err])
      [:p {:style "text-align: center"}
        [:span "Made by "]
        [:a {:href "https://dghaehre.com"} "Daniel"]
