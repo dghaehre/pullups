@@ -12,7 +12,7 @@
 
 (defn create-contest
   [name]
-  (db/insert {:db/table :contest :name name}))
+  (db/insert {:db/table :contest :name (from-cname name)}))
 
 (defn get-contest
   "Get contest. Returns nil if not found."
