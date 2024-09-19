@@ -2,11 +2,7 @@
 (use utils)
 (use ../utils)
 (import ../service/session :as s)
-
-(route :get "/login" :get/login)
-(route :post "/login" :session/login)
-(route :get "/logout" :session/logout)
-
+(import ../views/index :as view)
 
 (defn- redirect-error [err]
   (redirect-to :get/login {:? {:error err}}))
@@ -29,7 +25,7 @@
       [:input {:type "password" :name "password" :placeholder "Password"}]
       [:input {:type "submit" :value "Login"}]]
      (when (not (nil? err))
-       [notice-error err])]))
+       [view/notice-error err])]))
 
 (defn session/logout [req]
   (let [token (get-in req [:session :token])

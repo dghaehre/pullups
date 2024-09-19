@@ -1,9 +1,5 @@
 (use joy)
-(use ./pages/session)
-(use ./pages/home)
-(use ./pages/contest)
-(use ./pages/user)
-(use ./feedback)
+(use ./pages/index)
 
 # Layout
 (defn app-layout [{:body body :request request}]

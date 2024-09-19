@@ -4,6 +4,7 @@
 (import ../storage :as st)
 (import ../service/session :as s)
 (import ../chart :as chart)
+(import ../views/index :as view)
 
 # Views
 
@@ -72,13 +73,10 @@
      (if (and logged-in-userid (not user-part-of-contest))
        (new-private-form contest logged-in-userid)
        (new-user-form contest))
-     (if-not (nil? err) [notice-error err])
+     (if-not (nil? err) [view/notice-error err])
      (chart/loader name)]))
 
 # Routes
-
-(route :get "/:contest" :contest/index)
-(route :get "/:contest/get-chart" :contest/get-chart)
 
 (defn contest/index [req]
   (let [name               (get-in req [:params :contest])
@@ -96,7 +94,7 @@
           (s/add-last-visited req name))
 
       [[:script {:src "/xxx.chart.js" :defer ""}]
-       (header (get contest :name) logged-in-userid)
+       (view/header (get contest :name) logged-in-userid)
        (main/content contest logged-in-userid err)])))
 
 (defn contest/get-chart [req]

@@ -5,21 +5,7 @@
 (import ../service/general :as g)
 (import ../service/user :as user)
 (import ../service/session :as s)
-
-(route :post "/take-ownership" :post/take-ownership)
-(route :get "/take-ownership/:user-id" :get/take-ownership)
-
-(route :get "/private/user" :private/user)
-(route :get "/private/edit-contest/:id" :private/edit-contest)
-(route :post "/private/edit-contest/:id" :post/edit-contest)
-(route :get "/:contest/:user-id" :contest/user)
-(route :post "/record" :contest/record)
-(route :post "/create-user" :contest/create-user)
-
-(route :get "/:contest/:user/get-record-form/:change" :contest/get-record-form)
-(route :get "/get-record-form/:user/:change" :contest/get-record-form)
-
-(route :post "/join-contest" :contest/join-contest)
+(import ../views/index :as view)
 
 (defn- record-form [contest-name user-id current-amount &opt time change]
   "Where you record your daily stuff...
@@ -172,7 +158,7 @@
           (redirect-to :contest/index {:contest (cname contest-name)})
           (do
             (put user :today (st/get-today-amount user-id))
-            [(header contest-name logged-in-userid?)
+            [(view/header contest-name logged-in-userid?)
              (layout user contest logged-in-userid? err)]))))))
 
 (defn contest/record [req]
@@ -192,7 +178,7 @@
 
 (s/defn-auth contest/join-contest [req user-id]
   (let [contest-id    (as-> (get-in req [:body :contest-id]) ?
-                            (with-err "Not a valid contest id" (int/to-number (int/u64 ?))))
+                            (with-err "Not a valid contest id" (scan-number ?)))
         contest-name  (get-in req [:body :contest-name])]
     (assert (and (string? contest-name)
                  (not (= contest-name ""))))
@@ -207,13 +193,13 @@
         is-private (or (not (nil? (user :username))) (not (nil? (user :password))))]
     (when is-private # TODO: better way of handling this case
       (error "Cannot take ownership of a private user"))
-    [ (header "user name")
+    [ (view/header "user name")
       [:main
         [:h3 "Taking ownership of " (user :name)]
         [:p "By providing a username and password to an existing user, you can claim ownership of that user. This means that only you can update the user's information and record pullups for the user."]
         [:p "You will also be able to use the same user for multiple contests."]
         (when (not (nil? err))
-          [notice-error err])
+          [view/notice-error err])
         [:br]
         (private-form {:id user-id})]]))
 
@@ -231,7 +217,7 @@
   (let [user     (st/get-user user-id)
         contests (st/get-contests-by-user user-id)
         today    (st/get-today-amount user-id (time-by-change :today))]
-    [ (header-private (user :name))
+    [ (view/header-private (user :name))
       [:main
        [:p "This is your private user page"]
        [:table {:style "display: inline-table; margin: 0;" :class "contest-table"}
@@ -259,15 +245,15 @@
         flash       (get-in req [:query-string :flash])]
     (if (nil? contest)
       (redirect-to :home/index)
-      [ (header-private (user :name))
+      [ (view/header-private (user :name))
         [:main
          [:h3 "Edit contest"]
          (cond
            (not (nil? err))
-           [notice-error err]
+           [view/notice-error err]
 
            (not (nil? flash))
-           [notice flash]
+           [view/notice flash]
            
            [:p {:style "height: 28px;"}])
 

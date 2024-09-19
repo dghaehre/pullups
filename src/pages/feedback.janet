@@ -1,11 +1,7 @@
 (use joy)
 (use utils)
-(use ./utils)
-(import ./storage :as st)
-
-
-(route :post "/feedback" :feedback/index)
-
+(use ../utils)
+(import ../storage :as st)
 
 (defn- redirect [contest-id err]
   (let [status (if (nil? err)

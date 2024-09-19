@@ -5,6 +5,7 @@
 (import ../service/contest :as c)
 (import ../service/session :as s)
 (import ../storage :as st)
+(import ../views/index :as view)
 
 (def- home/header
   [:header
@@ -49,13 +50,9 @@
       [:p (string total-this-year " recorded pullups so far in " year "!")]
       [:p "When you have created a name for your group, you can add participants."]
       [:p "Or " [:a {:href "/login"} "login"] " if you already have an account"]
-      (if-not (nil? err) [notice-error err])]]))
+      (if-not (nil? err) [view/notice-error err])]]))
 
 # Routes
-
-(route :get "/" :home/index)
-(route :get "/check-name" :home/checkname)
-(route :post "/create-contest" :home/create-contest)
 
 (defn home/checkname
   "Check if name is available"
@@ -83,7 +80,7 @@
         last-visisted-contest (s/get-last-visited req)]
     [ home/header
      (main (st/total-this-year) logged-in? last-visisted-contest err)
-     (footer req)]))
+     (view/footer req)]))
 
 (comment
   (main nil))
