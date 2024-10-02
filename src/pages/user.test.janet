@@ -15,14 +15,13 @@
     @{:body " "
       :headers @{"Location" "/login"}
       :status 302})
-  (def login-res (session/login {:body {:username "something"
-                                        :password "password"}}))
-  (test (get login-res :headers) @{"Location" "/private/user"})
-  (test (get login-res :session)
-    {:token "fef3e289-cab3-4aa6-96c4-79c2c0779c3a"
-     :user-id 1})
+  (def {:headers headers
+        :session session} (session/login {:body {:username "something"
+                                                 :password "password"}}))
+  (test headers @{"Location" "/private/user"})
+  (test (get session :user-id) 1)
   (test (-> (private/user {:body {:contest-name "test-contest"}
-                           :session (get login-res :session)})
+                           :session session})
             (get 0)) # Only get header
     [:header
      [:div
