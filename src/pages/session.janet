@@ -18,14 +18,7 @@
                        
 (defn get/login [req]
   (let [err (get-in req [:query-string :error])]
-    [:main
-     [:h1 "Login"]
-     [:form {:method "post" :action "/login"}
-      [:input {:type "text" :name "username" :placeholder "Username"}]
-      [:input {:type "password" :name "password" :placeholder "Password"}]
-      [:input {:type "submit" :value "Login"}]]
-     (when (not (nil? err))
-       [view/notice-error err])]))
+    (view/login-main err)))
 
 (defn session/logout [req]
   (let [token (get-in req [:session :token])

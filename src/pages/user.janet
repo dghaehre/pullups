@@ -143,7 +143,7 @@
         user        (st/get-user user-id)
         time        (time-by-change (keyword change))
         today       (st/get-today-amount user-id time)]
-    (text/html (record-form name user-id today time (keyword change)))))
+    (text/html (view/user-record-form name user-id today time (keyword change)))))
 
 (defn contest/user [req]
   (let [err                 (get-in req [:query-string :error])
@@ -264,9 +264,9 @@
           [:p
             [:label "Contest name"]
             [:input {:type "text" :name "name" :value (get contest :name)}]]
-          [:p
-           [:label "Private contest"]
-           [:input {:type "checkbox" :name "private"}]] # TODO
+          # [:p
+          #  [:label "Private contest"]
+          #  [:input {:type "checkbox" :name "private"}]] # TODO
           [:details 
            [:summary "Start and end date"]
            [:div
@@ -276,7 +276,8 @@
                 [:input {:type "date" :name "start-date" :value (get contest :start-date)}]]
              [:p
                [:label "End date"]
-               [:input {:type "date" :name "end-date" :value (get contest :end-date)}]]]]
+               [:input {:type "date" :name "end-date" :value (get contest :end-date)}]]
+             [:small [:strong "NOTE: "] "This doesnt work yet 😅"]]]
           [:br]
           [:button {:type "submit"} "Update"]]]])))
 
