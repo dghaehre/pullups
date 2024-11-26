@@ -14,7 +14,7 @@
       [:link {:href "/simple.min.css" :rel "stylesheet"}]
       [:script {:src "/htmx.min.js" :defer ""}]
       [:link {:href "/app.v2.css" :rel "stylesheet"}]]
-     [:body {:hx-boost "true"}
+     [:body
        body]]))
 
 # Middleware
